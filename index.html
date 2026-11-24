@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>NexaBuild — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#fdf6ec; --surface:#ffffff; --ink:#1e1e1e;
+  --pink:#ffd6e0; --mint:#c9f2d8; --sky:#cfe4ff; --lav:#e3d9ff; --peach:#ffe3c7; --lemon:#fff3b0;
+  --green:#7ee2a8; --red:#ff9d9d; --amber:#ffd166; --err:#d63031;
+  --radius:10px; --border:2.5px solid var(--ink);
+  --shadow:5px 5px 0 var(--ink); --shadow-sm:3px 3px 0 var(--ink);
+  --font-display:'Archivo Black',sans-serif; --font-body:'Space Grotesk',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-body);background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:86px}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:15px}
+:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.hidden{display:none!important}
+
+.nb-card{background:var(--surface);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.nb-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--surface);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px 18px;font-weight:700;font-size:15px;color:var(--ink);transition:transform .12s,box-shadow .12s;text-decoration:none}
+.nb-btn:hover,.nb-btn:focus-visible,.nb-btn:active{box-shadow:var(--shadow);transform:translate(-2px,-2px)}
+.nb-btn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink)}
+.nb-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:var(--shadow-sm);transform:none}
+.nb-btn.primary{background:var(--mint)}
+.nb-btn.danger{background:var(--red)}
+.nb-btn.warn{background:var(--amber)}
+.nb-btn.small{padding:8px 12px;font-size:13px}
+.nb-input{width:100%;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:12px 14px;font-size:15px;box-shadow:var(--shadow-sm);transition:box-shadow .12s,transform .12s}
+.nb-input:hover,.nb-input:focus{box-shadow:var(--shadow);transform:translate(-1px,-1px)}
+.nb-input.invalid{border-color:var(--err);background:#fff3f3}
+.field-label{display:block;font-weight:700;font-size:13px;margin:0 0 6px 2px;text-transform:uppercase;letter-spacing:.04em}
+.field-hint{font-size:12px;color:#555;margin-top:5px}
+.field-error{display:none;font-size:12.5px;color:var(--err);margin-top:6px;font-weight:600;background:#ffe9e9;border:2px solid var(--err);border-radius:8px;padding:8px 10px;line-height:1.5}
+.field-error.show{display:block}
+.field-ok{display:none;font-size:12.5px;color:#1a7f4b;margin-top:6px;font-weight:600;background:var(--mint);border:2px solid var(--ink);border-radius:8px;padding:8px 10px}
+.field-ok.show{display:block}
+.pill{display:inline-flex;align-items:center;gap:6px;border:var(--border);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;background:var(--surface)}
+.section-title{font-family:var(--font-display);font-size:20px;margin:0 0 14px}
+.icon{width:20px;height:20px;flex:none}
+
+.skeleton{border-radius:var(--radius);background:linear-gradient(90deg,#eee 25%,#f7f7f7 50%,#eee 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border:var(--border)}
+@keyframes shimmer{to{background-position:-200% 0}}
+.state-box{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:22px;text-align:center;font-size:14px}
+.state-box .nb-btn{margin-top:12px}
+.spinner{width:26px;height:26px;border:3px solid var(--ink);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+.spinner.inline{width:16px;height:16px;border-width:2.5px;margin:0;display:inline-block;vertical-align:-3px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+#offlineBanner{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--red);border-bottom:var(--border);padding:10px 16px;font-weight:700;font-size:13px;text-align:center;display:none}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);border:var(--border);border-radius:var(--radius);padding:12px 18px;font-weight:700;font-size:13.5px;z-index:400;opacity:0;pointer-events:none;transition:all .25s;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.auth-card{width:100%;max-width:440px;padding:28px}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.auth-logo svg{width:52px;height:52px}
+.wordmark{font-family:var(--font-display);font-size:26px;letter-spacing:-.5px}
+.auth-field{margin-bottom:14px}
+.auth-user{display:flex;align-items:center;gap:12px;border:var(--border);border-radius:var(--radius);padding:10px;background:var(--mint);margin:14px 0}
+.auth-user img{width:44px;height:44px;border-radius:8px;border:var(--border)}
+.scope-note{font-size:12px;color:#555;background:var(--lemon);border:var(--border);border-radius:var(--radius);padding:10px 12px;margin-top:14px;line-height:1.5}
+
+#appShell{display:none}
+#topbar{position:sticky;top:0;z-index:90;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-bottom:var(--border);padding:12px 16px}
+#topbar .wordmark{font-size:20px}
+.topbar-logo svg{width:34px;height:34px;display:block}
+
+#drawerOverlay{position:fixed;inset:0;background:rgba(30,30,30,.45);z-index:150;display:none}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:min(320px,85vw);background:var(--surface);border-right:var(--border);z-index:160;transform:translateX(-105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+#drawer.open{transform:translateX(0)}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:var(--border)}
+.drawer-nav{flex:1;overflow-y:auto;padding:12px}
+.drawer-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px;font-weight:600;font-size:15px;box-shadow:var(--shadow-sm);transition:box-shadow .12s,transform .12s}
+.drawer-item:hover,.drawer-item:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px);background:var(--lav)}
+
+.ticker-wrap{overflow:hidden;border-bottom:var(--border);background:var(--surface)}
+.ticker{display:flex;gap:10px;padding:10px 0;width:max-content;animation:marquee 28s linear infinite}
+.ticker:hover{animation-play-state:paused}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+#bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:120;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:var(--border);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:var(--border);border-radius:var(--radius);padding:9px 4px;font-size:11.5px;font-weight:700;color:var(--ink);transition:all .12s}
+.nav-item:hover,.nav-item:focus-visible{box-shadow:var(--shadow-sm);transform:translateY(-2px)}
+.nav-item.active{background:var(--ink);color:var(--bg);box-shadow:var(--shadow-sm)}
+
+.module{padding:16px;max-width:720px;margin:0 auto}
+.account-bar{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:14px}
+.account-bar img{width:52px;height:52px;border-radius:10px;border:var(--border)}
+.acc-name{font-weight:700;font-size:16px}
+.acc-role{font-size:12.5px;color:#555;font-weight:600}
+.acc-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink)}
+.dot.on{background:var(--green)}.dot.off{background:var(--red)}
+.weather-chip{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:var(--sky);border:var(--border);border-radius:999px;padding:4px 10px}
+#introVideo{width:100%;display:block;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);background:#000;margin-bottom:14px}
+.indicator-stack{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.indicator{display:flex;align-items:center;gap:12px;padding:12px 14px;font-size:13.5px;font-weight:600}
+.indicator .bar{flex:1;height:10px;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:#fff}
+.indicator .bar>i{display:block;height:100%;background:var(--mint);transition:width .4s}
+.home-bottom{display:flex;align-items:stretch;gap:12px}
+#clockBox{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;padding:14px}
+#quranBox{width:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--lav);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);font-weight:700;font-size:12px;transition:box-shadow .12s,transform .12s}
+#quranBox:hover,#quranBox:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px)}
+
+.quran-list-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow-sm);font-weight:600;transition:box-shadow .12s,transform .12s}
+.quran-list-item:hover,.quran-list-item:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px);background:var(--peach)}
+.ayah{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:14px;margin-bottom:12px}
+.ayah-arab{font-size:22px;line-height:2.1;text-align:right;direction:rtl;margin-bottom:10px}
+.ayah-id{font-size:14px;color:#444;line-height:1.6}
+.ayah-num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:var(--border);border-radius:8px;background:var(--lemon);font-weight:700;font-size:12px;margin-bottom:8px}
+
+#modalOverlay{position:fixed;inset:0;background:rgba(30,30,30,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+</style>
+</head>
+<body>
+
+<div id="offlineBanner">Koneksi internet terputus. Beberapa fitur tidak berfungsi.</div>
+<div id="toast"></div>
+
+<!-- ================= AUTH ================= -->
+<div id="authScreen">
+  <div class="nb-card auth-card">
+    <div class="auth-logo">
+      <svg viewBox="0 0 64 64" aria-label="NexaBuild logo"><rect x="4" y="4" width="56" height="56" rx="10" fill="#ffd6e0" stroke="#1e1e1e" stroke-width="4"/><path d="M18 44 L32 18 L46 44" fill="none" stroke="#1e1e1e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="38" r="4" fill="#1e1e1e"/></svg>
+      <div>
+        <div class="wordmark">NexaBuild</div>
+        <div style="font-size:12px;font-weight:600;color:#555">Build APK langsung dari browser HP</div>
+      </div>
+    </div>
+
+    <!-- Step 1: token -->
+    <div id="authStep1">
+      <label class="field-label" for="tokenInput">GitHub Personal Access Token</label>
+      <input class="nb-input auth-field" id="tokenInput" type="password" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+      <div class="field-error" id="tokenErr"></div>
+      <button class="nb-btn primary" id="tokenBtn" style="width:100%;margin-top:6px">
+        <i data-lucide="key-round" class="icon"></i> Periksa Token
+      </button>
+      <div class="field-hint" style="margin-top:10px">Token butuh scope <b>repo</b> + <b>workflow</b>. Hanya disimpan di HP kamu, hanya dikirim ke api.github.com.</div>
+    </div>
+
+    <!-- Step 2: repo -->
+    <div id="authStep2" class="hidden">
+      <div class="auth-user">
+        <img id="authAvatar" alt="avatar">
+        <div>
+          <div id="authName" style="font-weight:700"></div>
+          <div id="authLogin" style="font-size:12px;color:#555"></div>
+        </div>
+        <span class="pill" style="margin-left:auto;background:var(--mint);font-size:11px">Token OK</span>
+      </div>
+      <label class="field-label" for="repoInput">Nama Repo (owner/nama-repo)</label>
+      <input class="nb-input auth-field" id="repoInput" type="text" placeholder="username/nexabuild-app" autocomplete="off" spellcheck="false">
+      <div class="field-error" id="repoErr"></div>
+      <div class="field-ok" id="repoOk"></div>
+      <button class="nb-btn primary" id="repoBtn" style="width:100%;margin-top:6px">
+        <i data-lucide="git-branch" class="icon"></i> Periksa &amp; Sambungkan Repo
+      </button>
+      <button class="nb-btn small" id="backTokenBtn" style="width:100%;margin-top:10px">← Ganti token</button>
+    </div>
+
+    <!-- Step 3: issue + masuk -->
+    <div id="authStep3" class="hidden">
+      <div class="auth-user">
+        <img id="authAvatar2" alt="avatar">
+        <div>
+          <div id="authName2" style="font-weight:700"></div>
+          <div id="authRepo2" style="font-size:12px;color:#555"></div>
+        </div>
+        <span class="pill" style="margin-left:auto;background:var(--mint);font-size:11px">Repo OK</span>
+      </div>
+      <label class="field-label" for="issueInput">Nomor Issue untuk Chat Global</label>
+      <input class="nb-input auth-field" id="issueInput" type="number" min="1" placeholder="contoh: 1 — biarkan kosong jika belum ada">
+      <div class="field-error" id="issueErr"></div>
+      <div class="field-hint">Buat issue dulu di GitHub: repo kamu → Issues → New issue → judul bebas (misal "Chat") → Submit → catat nomornya.</div>
+      <button class="nb-btn primary" id="enterBtn" style="width:100%;margin-top:10px">
+        <i data-lucide="arrow-right" class="icon"></i> Masuk Dashboard
+      </button>
+      <button class="nb-btn small" id="backRepoBtn" style="width:100%;margin-top:10px">← Ganti repo</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="appShell">
+  <header id="topbar">
+    <button class="nb-btn small" id="drawerBtn" aria-label="Buka menu"><i data-lucide="menu" class="icon"></i></button>
+    <div class="wordmark">NexaBuild</div>
+    <div class="topbar-logo">
+      <svg viewBox="0 0 64 64" aria-label="NexaBuild logo"><rect x="4" y="4" width="56" height="56" rx="10" fill="#c9f2d8" stroke="#1e1e1e" stroke-width="4"/><path d="M18 44 L32 18 L46 44" fill="none" stroke="#1e1e1e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="38" r="4" fill="#1e1e1e"/></svg>
+    </div>
+  </header>
+
+  <div id="drawerOverlay"></div>
+  <aside id="drawer" aria-label="Menu samping">
+    <div class="drawer-head">
+      <span class="wordmark" style="font-size:18px">NexaBuild</span>
+      <button class="nb-btn small" id="drawerClose"><i data-lucide="x" class="icon"></i></button>
+    </div>
+    <nav class="drawer-nav">
+      <button class="drawer-item" data-drawer="connection"><i data-lucide="git-branch" class="icon"></i> Koneksi GitHub</button>
+      <button class="drawer-item" data-drawer="keystore"><i data-lucide="key-round" class="icon"></i> Pengaturan Keystore</button>
+      <button class="drawer-item" data-drawer="profile"><i data-lucide="user-round" class="icon"></i> Profil &amp; Role</button>
+      <button class="drawer-item" data-drawer="chatissue"><i data-lucide="messages-square" class="icon"></i> Issue Chat Global</button>
+      <button class="drawer-item" data-drawer="about"><i data-lucide="info" class="icon"></i> Tentang Aplikasi</button>
+      <button class="drawer-item" data-drawer="logout"><i data-lucide="log-out" class="icon"></i> Putuskan Koneksi</button>
+    </nav>
+  </aside>
+
+  <main>
+    <!-- ============ HOME ============ -->
+    <section class="module" id="module-home">
+      <div class="ticker-wrap"><div class="ticker" id="ticker"></div></div>
+      <div class="nb-card account-bar" style="margin-top:14px">
+        <img id="homeAvatar" alt="avatar">
+        <div>
+          <div class="acc-name" id="homeName">—</div>
+          <div class="acc-role" id="homeRole">Developer</div>
+        </div>
+        <div class="acc-right">
+          <div class="weather-chip" id="weatherChip"><i data-lucide="cloud-sun" class="icon" style="width:14px;height:14px"></i><span id="weatherText">…</span></div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700"><span class="dot off" id="connDot"></span><span id="connText">Cek koneksi…</span></div>
+        </div>
+      </div>
+      <video id="introVideo" src="assets/nexabuild-intro.mp4" autoplay loop muted playsinline></video>
+      <div class="indicator-stack">
+        <div class="nb-card indicator" id="batteryRow"><i data-lucide="battery-charging" class="icon"></i><span style="min-width:92px">Baterai</span><div class="bar"><i id="batteryBar"></i></div><span id="batteryText" style="min-width:52px;text-align:right">…</span></div>
+        <div class="nb-card indicator" id="storageRow"><i data-lucide="hard-drive" class="icon"></i><span style="min-width:92px">Penyimpanan web</span><div class="bar"><i id="storageBar"></i></div><span id="storageText" style="min-width:52px;text-align:right">…</span></div>
+        <div class="nb-card indicator" id="ramRow"><i data-lucide="memory-stick" class="icon"></i><span style="min-width:92px">RAM (perkiraan)</span><div class="bar"><i id="ramBar"></i></div><span id="ramText" style="min-width:52px;text-align:right">…</span></div>
+      </div>
+      <div class="home-bottom">
+        <div class="nb-card" id="clockBox">--:--:--</div>
+        <button id="quranBox"><i data-lucide="book-open" class="icon"></i>Al-Qur'an</button>
+      </div>
+    </section>
+
+    <!-- ============ QURAN VIEW ============ -->
+    <section class="module hidden" id="module-quran">
+      <button class="nb-btn small" id="quranBack" style="margin-bottom:14px"><i data-lucide="arrow-left" class="icon"></i> Kembali</button>
+      <div id="quranContent"></div>
+    </section>
+
+    <!-- ============ BUILD ============ -->
+    <section class="module hidden" id="module-build">
+      <h2 class="section-title">Build Project</h2>
+      <div class="nb-card" style="padding:16px;margin-bottom:14px">
+        <div class="field-label">1 · Sumber Project</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
+          <button class="nb-btn small" id="srcZipBtn"><i data-lucide="file-archive" class="icon"></i> Upload ZIP</button>
+          <button class="nb-btn small" id="srcUrlBtn"><i data-lucide="link" class="icon"></i> URL Website</button>
+          <input type="file" id="zipInput" accept=".zip" class="hidden">
+        </div>
+        <div id="urlInputWrap" class="hidden">
+          <input class="nb-input" id="urlInput" type="url" placeholder="https://situskamu.com">
+          <div class="field-error" id="urlErr"></div>
+        </div>
+        <div id="zipInfo" class="hidden" style="font-size:13px;font-weight:600;background:var(--sky);border:var(--border);border-radius:var(--radius);padding:10px 12px"></div>
+        <div style="margin-top:12px">
+          <span class="field-label">Tipe project terdeteksi</span>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+            <span class="pill" id="detectedType" style="background:var(--lemon)">Belum ada sumber</span>
+            <button class="nb-btn small hidden" id="correctTypeBtn">Koreksi manual</button>
+          </div>
+          <div class="field-error" id="typeErr"></div>
+        </div>
+      </div>
+
+      <div class="nb-card" style="padding:16px;margin-bottom:14px">
+        <div class="field-label">2 · Identitas Aplikasi (wajib)</div>
+        <div style="display:grid;gap:12px">
+          <div><label class="field-label" for="appName">Nama aplikasi</label><input class="nb-input" id="appName" maxlength="30"><div class="field-error" id="appNameErr"></div></div>
+          <div><label class="field-label" for="shortName">Short name</label><input class="nb-input" id="shortName" maxlength="12"><div class="field-error" id="shortNameErr"></div></div>
+          <div><label class="field-label" for="packageId">Package ID</label><input class="nb-input" id="packageId" placeholder="com.nama.app" spellcheck="false"><div class="field-error" id="packageIdErr"></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label class="field-label" for="versionName">Version name</label><input class="nb-input" id="versionName" placeholder="1.0.0"></div>
+            <div><label class="field-label" for="versionCode">Version code</label><input class="nb-input" id="versionCode" type="number" min="1" step="1"></div>
+          </div>
+          <div>
+            <span class="field-label">Icon aplikasi</span>
+            <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+              <canvas id="iconPreview" width="96" height="96" style="border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);background:#fff"></canvas>
+              <div style="flex:1;min-width:180px">
+                <button class="nb-btn small" id="uploadIconBtn"><i data-lucide="image-plus" class="icon"></i> Upload gambar</button>
+                <input type="file" id="iconInput" accept="image/*" class="hidden">
+                <div class="field-hint" id="iconHint">Belum diupload — icon default dari inisial nama dibuat otomatis.</div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <span class="field-label">Permission Android</span>
+            <div id="permList" style="display:grid;gap:8px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nb-card" style="padding:16px;margin-bottom:14px">
+        <button class="nb-btn" id="featToggle" style="width:100%;justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:8px"><i data-lucide="sliders-horizontal" class="icon"></i> Fitur Opsional</span>
+          <i data-lucide="chevron-down" class="icon" id="featChevron"></i>
+        </button>
+        <div id="featBody" class="hidden" style="margin-top:16px;display:grid;gap:14px">
+          <div><label class="field-label" for="splashText">Teks splash screen</label><input class="nb-input" id="splashText" placeholder="NexaBuild App"></div>
+          <div><label class="field-label" for="orientation">Orientasi layar</label>
+            <select class="nb-input" id="orientation"><option value="portrait">Portrait (default)</option><option value="landscape">Landscape</option><option value="sensor">Sensor (otomatis)</option></select></div>
+          <div><label class="field-label" for="themeColor">Warna tema</label><input class="nb-input" id="themeColor" type="color" value="#ffd6e0" style="height:48px;padding:6px"></div>
+          <div class="nb-card" style="padding:12px;box-shadow:var(--shadow-sm)">
+            <div class="field-label" style="margin-bottom:8px">Opsi WebView</div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px"><input type="checkbox" id="optZoom" checked> Izinkan zoom</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px"><input type="checkbox" id="optPull" checked> Pull-to-refresh</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px"><input type="checkbox" id="optBack" checked> Tombol back menutup app</label>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><input type="checkbox" id="optOffline"> Halaman offline (HTML lokal)</label>
+          </div>
+          <div>
+            <label class="field-label" for="privacyUrl">Privacy Policy URL</label>
+            <input class="nb-input" id="privacyUrl" type="url" placeholder="https://situskamu.com/privacy">
+            <span class="pill" style="background:var(--peach);margin-top:6px;font-size:11px">Wajib sebelum submit Play Store (tidak memblokir build)</span>
+          </div>
+          <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><input type="checkbox" id="optPush"> Push Notification (FCM)</label>
+          <div id="pushWrap" class="hidden"><label class="field-label" for="gjsonInput">google-services.json</label><input class="nb-input" id="gjsonInput" type="file" accept=".json"><div class="field-hint" id="gjsonHint">File config Firebase project kamu.</div></div>
+          <div>
+            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><input type="checkbox" id="optLogin"> Login Google / Social</label>
+            <div class="field-hint" style="background:var(--lemon);border:var(--border);border-radius:var(--radius);padding:8px 10px;margin-top:6px">Wajib pakai Chrome Custom Tabs — Google memblokir OAuth via WebView sejak 2016.</div>
+          </div>
+          <div class="nb-card" style="padding:12px;box-shadow:var(--shadow-sm)">
+            <div class="field-label" style="margin-bottom:8px">Keystore release</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
+              <button class="nb-btn small" id="ksGenBtn">Generate otomatis</button>
+              <button class="nb-btn small" id="ksUpBtn">Upload manual</button>
+              <input type="file" id="ksInput" accept=".jks,.keystore" class="hidden">
+            </div>
+            <div id="ksStatus" style="font-size:13px;font-weight:600;margin-bottom:10px">Belum ada keystore — dibuat otomatis oleh workflow.</div>
+            <button class="nb-btn warn small hidden" id="ksDlBtn"><i data-lucide="download" class="icon"></i> Download Backup Keystore</button>
+            <div class="field-hint" style="color:var(--err);font-weight:700;margin-top:8px">Kalau keystore hilang, app TIDAK BISA diupdate lagi di Play Store. Simpan backup-nya.</div>
+          </div>
+          <div><label class="field-label" for="whitelist">Whitelist domain (network security config)</label><textarea class="nb-input" id="whitelist" rows="3" placeholder="example.com&#10;api.situsku.com" spellcheck="false"></textarea><div class="field-hint">Satu domain per baris. Cleartext HTTP diblokir kecuali domain di sini.</div></div>
+        </div>
+      </div>
+
+      <button class="nb-btn primary" id="buildBtn" disabled style="width:100%;padding:16px;font-size:17px">
+        <i data-lucide="hammer" class="icon"></i> Build APK
+      </button>
+
+      <div id="terminalWrap" class="hidden" style="margin-top:16px">
+        <div class="nb-card" style="overflow:hidden">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:var(--border);background:var(--ink);color:var(--bg)">
+            <span style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px"><i data-lucide="terminal" class="icon"></i> NexaBuild</span>
+            <span style="display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700">
+              <span id="termStatus">Menunggu…</span>
+              <span class="pill" style="background:var(--lemon);color:var(--ink)" id="termTimer">00:00</span>
+            </span>
+          </div>
+          <div id="termBody" style="background:#141414;color:#e8e8e8;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.7;padding:14px;height:280px;overflow-y:auto"></div>
+        </div>
+        <div id="dlWrap" class="hidden" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+          <a class="nb-btn primary" id="dlApk" target="_blank" rel="noopener"><i data-lucide="download" class="icon"></i> Download APK</a>
+          <a class="nb-btn" id="dlAab" target="_blank" rel="noopener"><i data-lucide="package" class="icon"></i> Download AAB</a>
+        </div>
+        <div id="buildFail" class="hidden state-box" style="margin-top:12px;border-color:var(--err)">
+          <b style="color:var(--err)">Build gagal.</b><div id="buildFailMsg" style="margin-top:6px;font-size:13px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ EDIT ============ -->
+    <section class="module hidden" id="module-edit">
+      <h2 class="section-title">Edit App</h2>
+      <div id="editList"></div>
+    </section>
+
+    <!-- ============ CHAT ============ -->
+    <section class="module hidden" id="module-chat">
+      <h2 class="section-title">Chat Global</h2>
+      <div id="chatIssueWarn" class="state-box hidden" style="margin-bottom:14px">
+        Nomor issue chat belum diisi. Buka menu (≡) → <b>Issue Chat Global</b> untuk mengisinya.
+      </div>
+      <div id="chatBox" class="nb-card hidden" style="display:flex;flex-direction:column;height:calc(100vh - 260px);min-height:380px;overflow:hidden">
+        <div id="chatMessages" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px"></div>
+        <div style="display:flex;gap:10px;padding:12px;border-top:var(--border)">
+          <input class="nb-input" id="chatInput" placeholder="Tulis pesan…" maxlength="500">
+          <button class="nb-btn primary" id="chatSend" style="padding:12px 16px"><i data-lucide="send-horizontal" class="icon"></i></button>
+        </div>
+      </div>
+      <div id="chatState"></div>
+    </section>
+  </main>
+
+  <nav id="bottomNav">
+    <button class="nav-item active" data-nav="home"><i data-lucide="house" class="icon"></i>Home</button>
+    <button class="nav-item" data-nav="build"><i data-lucide="hammer" class="icon"></i>Build</button>
+    <button class="nav-item" data-nav="edit"><i data-lucide="pencil-ruler" class="icon"></i>Edit</button>
+    <button class="nav-item" data-nav="chat"><i data-lucide="messages-square" class="icon"></i>Chat</button>
+  </nav>
+</div>
+
+<!-- ================= MODAL ================= -->
+<div id="modalOverlay">
+  <div class="nb-card" style="width:100%;max-width:400px;padding:22px">
+    <div id="modalTitle" style="font-family:var(--font-display);font-size:17px;margin-bottom:10px"></div>
+    <div id="modalBody" style="font-size:14px;line-height:1.6"></div>
+    <div id="modalInputWrap" class="hidden" style="margin-top:12px"><input class="nb-input" id="modalInput"></div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+      <button class="nb-btn small" id="modalCancel">Batal</button>
+      <button class="nb-btn small primary" id="modalOk">OK</button>
+    </div>
+  </div>
+</div>
+<script>
+"use strict";
+/* ============================================================
+   NexaBuild v2 — client-side dashboard, GitHub as backend
+   ============================================================ */
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const LS={get:(k,d)=>{try{const v=localStorage.getItem("nb_"+k);return v!==null?JSON.parse(v):d}catch(e){return d}},set:(k,v)=>{try{localStorage.setItem("nb_"+k,JSON.stringify(v))}catch(e){}},del:k=>{try{localStorage.removeItem("nb_"+k)}catch(e){}}};
+
+const state={
+  token:LS.get("token",""),repo:LS.get("repo",""),issue:LS.get("issue",0),
+  user:LS.get("user",null),profile:LS.get("profile",{role:"Developer"}),
+  builds:[],rateLimit:{remaining:null,reset:null},
+  build:{sourceType:null,zipName:null,projectType:null,zipBase64:null,url:"",iconDataUrl:null,iconGenerated:false,keystore:null,gjson:null,running:false,runId:null,timerInt:null,pollInt:null}
+};
+
+const refreshIcons=()=>{try{window.lucide&&lucide.createIcons()}catch(e){}};
+
+/* ---------- toast ---------- */
+let toastT=null;
+function toast(msg,ms=3200){
+  const t=$("#toast");t.textContent=msg;t.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),ms);
+}
+
+/* ---------- modal ---------- */
+function nbModal({title,body,input=false,value="",okText="OK",danger=false}){
+  return new Promise(res=>{
+    const ov=$("#modalOverlay");
+    $("#modalTitle").textContent=title;
+    $("#modalBody").innerHTML=body;
+    $("#modalInputWrap").classList.toggle("hidden",!input);
+    if(input){$("#modalInput").value=value;}
+    const ok=$("#modalOk");ok.textContent=okText;ok.className="nb-btn small "+(danger?"danger":"primary");
+    ov.style.display="flex";
+    const done=v=>{ov.style.display="none";ok.onclick=ca.onclick=ov.onclick=null;res(v);};
+    ok.onclick=()=>done(input?$("#modalInput").value.trim():true);
+    const ca=$("#modalCancel");ca.onclick=()=>done(null);
+    ov.onclick=e=>{if(e.target===ov)done(null);};
+    if(input)setTimeout(()=>$("#modalInput").focus(),50);
+  });
+}
+
+/* ---------- field error helpers ---------- */
+function fErr(sel,msg){const e=$(sel);if(!e)return;if(msg){e.textContent=msg;e.classList.add("show");}else{e.classList.remove("show");}}
+function fOk(sel,msg){const e=$(sel);if(!e)return;if(msg){e.textContent=msg;e.classList.add("show");}else{e.classList.remove("show");}}
+
+/* ---------- offline ---------- */
+const updateOnline=()=>{$("#offlineBanner").style.display=navigator.onLine?"none":"block";};
+window.addEventListener("online",()=>{updateOnline();toast("Koneksi kembali online.");});
+window.addEventListener("offline",()=>{updateOnline();toast("Koneksi terputus. Cek internet kamu.");});
+updateOnline();
+
+/* ---------- GitHub API layer ---------- */
+function friendlyError(e,context){
+  const m=e.message||String(e);
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m))return "Jaringan bermasalah atau koneksi terputus. Cek internet kamu, lalu coba lagi.";
+  if(/403/.test(m)&&/rate limit|kuota/i.test(m))return "Kuota GitHub API habis sementara. Tunggu ±1 jam, atau buat token baru.";
+  if(/401|Bad credentials/i.test(m))return "Token ditolak GitHub. Pastikan token benar, belum kedaluwarsa, dan scope repo+workflow aktif.";
+  if(/404|Not Found/i.test(m))return context==="repo"?"Repo tidak ditemukan. Cek penulisan owner/nama-repo (huruf besar/kecil sama saja, tapi harus persis).":"Data tidak ditemukan di repo.";
+  if(/422/.test(m))return "Data yang dikirim tidak valid. Periksa kembali isian.";
+  return m;
+}
+async function gh(path,{method="GET",body=null,raw=false,retries=3,context=""}={}){
+  if(!navigator.onLine)throw new Error("Kamu sedang offline. Nyalakan internet dulu.");
+  let lastErr;
+  for(let i=0;i<retries;i++){
+    try{
+      const res=await fetch("https://api.github.com"+path,{
+        method,body:body?JSON.stringify(body):null,raw,
+        headers:{"Authorization":"Bearer "+state.token,"Accept":"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28",...(body&&!raw?{"Content-Type":"application/json"}:{})}
+      });
+      const rl=res.headers.get("X-RateLimit-Remaining");
+      if(rl!==null){state.rateLimit.remaining=+rl;state.rateLimit.reset=+res.headers.get("X-RateLimit-Reset")*1000;rateWatch();}
+      if(res.status===204)return null;
+      const data=raw?await res.text():await res.json().catch(()=>null);
+      if(!res.ok){
+        if(res.status===403&&rl==="0"){
+          const wait=Math.max(1,Math.ceil((state.rateLimit.reset-Date.now())/60000));
+          throw new Error("Kuota GitHub API habis. Coba lagi ±"+wait+" menit (reset otomatis).");
+        }
+        if(res.status===401)throw new Error("401 Bad credentials");
+        if(res.status===404)throw new Error("404 Not Found");
+        if(res.status===422)throw new Error("422 "+((data&&data.message)||"Unprocessable"));
+        throw new Error((data&&data.message)||("HTTP "+res.status));
+      }
+      return data;
+    }catch(e){
+      lastErr=e;
+      if(i<retries-1)await new Promise(r=>setTimeout(r,700*(i+1)));
+    }
+  }
+  throw new Error(friendlyError(lastErr,context));
+}
+function rateWatch(){
+  const r=state.rateLimit.remaining;
+  if(r!==null&&r<60&&r>0){
+    const el=$("#rlPill");
+    if(el)el.textContent="Kuota GitHub API tersisa "+r;
+    else{
+      const p=document.createElement("span");p.id="rlPill";p.className="pill";p.style.background="var(--red)";
+      p.textContent="Kuota GitHub API tersisa "+r;$("#ticker")&&$("#ticker").prepend(p);
+    }
+  }
+}
+function renderState(container,kind,{onRetry,msg}={}){
+  const c=$(container);if(!c)return;
+  if(kind==="loading")c.innerHTML='<div class="state-box"><div class="spinner"></div>Memuat…</div>';
+  else if(kind==="error")c.innerHTML='<div class="state-box"><b style="color:var(--err)">Terjadi kesalahan.</b><div style="margin-top:6px;font-size:13px">'+(msg||"Gagal memuat data.")+'</div><button class="nb-btn small" data-retry>Coba lagi</button></div>';
+  else if(kind==="empty")c.innerHTML='<div class="state-box">'+(msg||"Belum ada data.")+'</div>';
+  else c.innerHTML="";
+  const rb=c.querySelector("[data-retry]");if(rb&&onRetry)rb.onclick=onRetry;
+}
+
+/* ---------- AUTH: 3 langkah, error jelas per langkah ---------- */
+function setBtnLoading(btn,on,html){
+  if(on){btn.dataset.orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spinner inline"></span> '+(html||"Memproses…");}
+  else{btn.disabled=false;btn.innerHTML=btn.dataset.orig||html;}
+}
+function showAuthStep(n){
+  ["#authStep1","#authStep2","#authStep3"].forEach((s,i)=>$(s).classList.toggle("hidden",i!==n-1));
+  refreshIcons();
+}
+async function checkToken(){
+  fErr("#tokenErr");
+  const token=$("#tokenInput").value.trim();
+  if(!token){fErr("#tokenErr","Token masih kosong. Paste token GitHub kamu di sini.");return;}
+  if(!/^(gh[ps]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})$/.test(token)){
+    fErr("#tokenErr","Format token salah. Token klasik diawali ghp_ (contoh: ghp_aB3...). Token fine-grained diawali github_pat_. Salin ulang dari halaman GitHub → Settings → Developer settings → Tokens.");
+    return;
+  }
+  const btn=$("#tokenBtn");setBtnLoading(btn,true,"Memeriksa token…");
+  try{
+    const user=await gh("/user",{context:"token"});
+    state.token=token;state.user={login:user.login,name:user.name||user.login,avatar:user.avatar_url};
+    LS.set("token",token);LS.set("user",state.user);
+    $("#authAvatar").src=state.user.avatar;$("#authName").textContent=state.user.name;$("#authLogin").textContent="@"+state.user.login;
+    $("#authAvatar2").src=state.user.avatar;$("#authName2").textContent=state.user.name;$("#authRepo2").textContent="—";
+    toast("Token valid. Halo, "+state.user.name+"!");
+    showAuthStep(2);
+    setTimeout(()=>$("#repoInput").focus(),100);
+  }catch(e){
+    fErr("#tokenErr",friendlyError(e,"token")+" — Jika yakin token benar, cek juga: scope repo & workflow sudah dicentang saat membuat token.");
+  }
+  setBtnLoading(btn,false);
+}
+async function checkRepo(){
+  fErr("#repoErr");fOk("#repoOk");
+  const repo=$("#repoInput").value.trim().replace(/^https?:\/\/github\.com\//i,"").replace(/\/+$/,"");
+  if(!repo){fErr("#repoErr","Nama repo masih kosong. Format: owner/nama-repo, contoh: budi123/aplikasiku.");return;}
+  if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\/[A-Za-z0-9_.-]+$/.test(repo)){
+    fErr("#repoErr","Format salah. Harus ada tanda pisah: username/nama-repo. Contoh benar: budi123/aplikasiku. Contoh salah: budi123 (tanpa nama repo).");
+    return;
+  }
+  const btn=$("#repoBtn");setBtnLoading(btn,true,"Memeriksa repo…");
+  try{
+    const r=await gh("/repos/"+repo,{context:"repo"});
+    if(r.private)throw new Error("Repo ini PRIVATE. GitHub Actions gratis hanya unlimited untuk repo PUBLIK. Ubah repo ke Public: repo → Settings → Danger Zone → Change visibility → Make public.");
+    const canPush=r.permissions&&(r.permissions.push||r.permissions.admin);
+    if(!canPush)throw new Error("Token valid tapi TIDAK punya akses tulis ke repo "+repo+". Kamu harus pemilik repo atau kolaborator dengan akses write.");
+    state.repo=repo;LS.set("repo",repo);
+    $("#authRepo2").textContent=repo;
+    fOk("#repoOk","Repo OK: "+repo+(r.description?" — "+r.description:""));
+    toast("Repo tersambung: "+repo);
+    showAuthStep(3);
+  }catch(e){
+    fErr("#repoErr",friendlyError(e,"repo"));
+  }
+  setBtnLoading(btn,false);
+}
+function enterDashboard(){
+  const iss=$("#issueInput").value.trim();
+  fErr("#issueErr");
+  if(iss){
+    if(!/^\d+$/.test(iss)||+iss<1){fErr("#issueErr","Nomor issue harus angka bulat positif, contoh: 1. Kosongkan saja kalau belum punya issue chat.");return;}
+    state.issue=+iss;LS.set("issue",state.issue);
+  }
+  LS.set("profile",state.profile);
+  $("#authScreen").classList.add("hidden");
+  $("#appShell").style.display="block";
+  $("#homeAvatar").src=state.user.avatar;
+  $("#homeName").textContent=state.user.name;
+  $("#homeRole").textContent=state.profile.role||"Developer";
+  refreshIcons();initHome();loadBuilds();startChatIfReady();
+  toast("Selamat datang di NexaBuild, "+state.user.name+"!");
+}
+function logout(){
+  nbModal({title:"Putuskan koneksi?",body:"Token, nama repo, dan data lokal akan dihapus dari browser ini. Kamu bisa sambungkan lagi kapan pun.",okText:"Putuskan",danger:true}).then(v=>{
+    if(!v)return;
+    ["token","repo","user","profile","issue"].forEach(k=>LS.del(k));
+    location.reload();
+  });
+}
+$("#tokenBtn").onclick=checkToken;
+$("#repoBtn").onclick=checkRepo;
+$("#enterBtn").onclick=enterDashboard;
+$("#backTokenBtn").onclick=()=>showAuthStep(1);
+$("#backRepoBtn").onclick=()=>showAuthStep(2);
+$("#tokenInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkToken();});
+$("#repoInput").addEventListener("keydown",e=>{if(e.key==="Enter")checkRepo();});
+$("#issueInput").addEventListener("keydown",e=>{if(e.key==="Enter")enterDashboard();});
+
+/* ---------- drawer ---------- */
+const drawer=$("#drawer"),dov=$("#drawerOverlay");
+const openDrawer=()=>{drawer.classList.add("open");dov.style.display="block";};
+const closeDrawer=()=>{drawer.classList.remove("open");dov.style.display="none";};
+$("#drawerBtn").onclick=openDrawer;$("#drawerClose").onclick=closeDrawer;dov.onclick=closeDrawer;
+$$(".drawer-item").forEach(b=>b.onclick=async()=>{
+  closeDrawer();const k=b.dataset.drawer;
+  if(k==="logout")return logout();
+  if(k==="connection"){
+    nbModal({title:"Koneksi GitHub",body:"Token: <b>"+esc(state.token.slice(0,12))+"…</b><br>Repo: <b>"+esc(state.repo)+"</b><br>User: <b>"+esc(state.user.login)+"</b><br><br>Untuk mengganti, putuskan koneksi lalu sambungkan ulang.",okText:"Tutup"});
+    return;
+  }
+  if(k==="profile"){
+    const r=await nbModal({title:"Profil & Role",body:"Role tampil di Account Bar Home.",input:true,value:state.profile.role||"Developer",okText:"Simpan"});
+    if(r!==null){state.profile.role=r.trim()||"Developer";LS.set("profile",state.profile);$("#homeRole").textContent=state.profile.role;toast("Role diperbarui.");}
+    return;
+  }
+  if(k==="chatissue"){
+    const r=await nbModal({title:"Issue Chat Global",body:"Masukkan nomor issue di repo <b>"+esc(state.repo)+"</b> yang dijadikan ruang chat. Buat dulu issue-nya di GitHub bila belum ada.",input:true,value:String(state.issue||""),okText:"Simpan"});
+    if(r!==null&&r.trim()){
+      if(!/^\d+$/.test(r)||+r<1){toast("Nomor issue tidak valid.");return;}
+      state.issue=+r;LS.set("issue",state.issue);startChatIfReady();toast("Issue chat diset ke #"+state.issue);
+    }
+    return;
+  }
+  if(k==="keystore"){
+    nbModal({title:"Pengaturan Keystore",body:"Keystore per-app dikelola di form Build → Fitur Opsional. Setelah generate/upload, gunakan tombol <b>Download Backup Keystore</b> dan simpan filenya.",okText:"Mengerti"});
+    return;
+  }
+  if(k==="about"){
+    nbModal({title:"Tentang NexaBuild",body:"NexaBuild v2.0 — dashboard build APK/AAB 100% client-side. Repo kamu = database, storage &amp; compute engine via GitHub Actions. Tanpa server, tanpa biaya.",okText:"Tutup"});
+  }
+});
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
+
+/* ---------- navigation ---------- */
+$$(".nav-item").forEach(b=>b.onclick=()=>{
+  $$(".nav-item").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+  ["home","build","edit","chat","quran"].forEach(m=>$("#module-"+m).classList.add("hidden"));
+  $("#module-"+b.dataset.nav).classList.remove("hidden");
+  if(b.dataset.nav==="edit")renderEditList();
+  if(b.dataset.nav==="chat")startChatIfReady();
+  if(b.dataset.nav==="build")nextVersionCode();
+  window.scrollTo(0,0);
+});
+</script>
+<script>
+"use strict";
+/* ================= HOME ================= */
+function initHome(){
+  const items=[["GitHub: "+state.repo,"var(--sky)"],["v2.0 · NexaBuild","var(--lemon)"],["Tips: isi Privacy Policy sebelum Play Store","var(--peach)"],["Build via GitHub Actions","var(--mint)"],["Token tersimpan lokal di HP","var(--lav)"]];
+  const half=items.map(([t,c])=>'<span class="pill" style="background:'+c+'">'+esc(t)+'</span>').join("");
+  $("#ticker").innerHTML=half+half;
+  gh("/repos/"+state.repo).then(()=>{$("#connDot").className="dot on";$("#connText").textContent="Terhubung";})
+    .catch(()=>{$("#connDot").className="dot off";$("#connText").textContent="Terputus";});
+  initWeather();initBattery();initStorage();initRam();startClock();
+}
+function initWeather(){
+  if(!navigator.geolocation){$("#weatherText").textContent="Lokasi tidak didukung";return;}
+  navigator.geolocation.getCurrentPosition(async pos=>{
+    try{
+      const u="https://api.open-meteo.com/v1/forecast?latitude="+pos.coords.latitude+"&longitude="+pos.coords.longitude+"&current=temperature_2m,weather_code&timezone=auto";
+      const d=await(await fetch(u)).json();
+      const code=d.current.weather_code,t=Math.round(d.current.temperature_2m)+"°C";
+      const map=[[0,"sun"],[1,"cloud-sun"],[2,"cloud-sun"],[3,"cloud"],[45,"cloud-fog"],[48,"cloud-fog"],[51,"cloud-drizzle"],[53,"cloud-drizzle"],[55,"cloud-drizzle"],[61,"cloud-rain"],[63,"cloud-rain"],[65,"cloud-rain"],[71,"snowflake"],[73,"snowflake"],[75,"snowflake"],[80,"cloud-rain"],[81,"cloud-rain"],[82,"cloud-rain"],[95,"cloud-lightning"]];
+      const ic=(map.find(m=>code<=m[0])||map[2])[1];
+      $("#weatherChip").innerHTML='<i data-lucide="'+ic+'" class="icon" style="width:14px;height:14px"></i><span>'+t+'</span>';refreshIcons();
+    }catch{$("#weatherText").textContent="Gagal memuat";}
+  },()=>{$("#weatherText").textContent="Izin lokasi ditolak";},{timeout:8000});
+}
+function initBattery(){
+  if(!navigator.getBattery){$("#batteryText").textContent="Tidak tersedia di browser ini";return;}
+  navigator.getBattery().then(b=>{
+    const upd=()=>{const p=Math.round(b.level*100);$("#batteryText").textContent=p+"%"+(b.charging?" ⚡":"");$("#batteryBar").style.width=p+"%";$("#batteryBar").style.background=p<20?"var(--red)":"var(--mint)";};
+    upd();b.addEventListener("levelchange",upd);b.addEventListener("chargingchange",upd);
+  }).catch(()=>{$("#batteryText").textContent="Tidak tersedia di browser ini";});
+}
+async function initStorage(){
+  if(!navigator.storage?.estimate){$("#storageText").textContent="Tidak tersedia";return;}
+  try{
+    const e=await navigator.storage.estimate();
+    const used=e.usage||0,quota=e.quota||1,p=Math.min(100,Math.round(used/quota*100));
+    $("#storageText").textContent=fmtBytes(used)+" / "+fmtBytes(quota);
+    $("#storageBar").style.width=Math.max(4,p)+"%";
+  }catch{$("#storageText").textContent="Tidak tersedia";}
+}
+function initRam(){
+  if(!navigator.deviceMemory){$("#ramText").textContent="Tidak tersedia di browser ini";return;}
+  const gb=navigator.deviceMemory,p=Math.min(100,gb/16*100);
+  $("#ramText").textContent="±"+gb+" GB";$("#ramBar").style.width=p+"%";
+}
+function fmtBytes(b){if(b<1024)return b+" B";if(b<1048576)return(b/1024).toFixed(1)+" KB";if(b<1073741824)return(b/1048576).toFixed(1)+" MB";return(b/1073741824).toFixed(2)+" GB";}
+function startClock(){const f=()=>{$("#clockBox").textContent=new Date().toLocaleTimeString(undefined,{hour:"2-digit",minute:"2-digit",second:"2-digit"});};f();setInterval(f,1000);}
+
+/* ---------- Al-Qur'an ---------- */
+$("#quranBox").onclick=()=>{showModule("quran");renderQuranHome();};
+$("#quranBack").onclick=()=>showModule("home");
+function showModule(m){["home","quran","build","edit","chat"].forEach(x=>$("#module-"+x).classList.add("hidden"));$("#module-"+m).classList.remove("hidden");$$(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.nav===m));window.scrollTo(0,0);}
+async function renderQuranHome(){
+  renderState("#quranContent","loading");
+  try{
+    const d=await(await fetch("https://api.alquran.cloud/v1/surah")).json();
+    if(d.code!==200)throw new Error("API error");
+    $("#quranContent").innerHTML='<div class="nb-card" style="padding:14px;margin-bottom:14px"><div class="field-label">Pilih Surah</div><div id="surahList" style="max-height:320px;overflow-y:auto"></div></div>';
+    const list=$("#surahList");
+    d.data.forEach(s=>{
+      const b=document.createElement("button");b.className="quran-list-item";
+      b.innerHTML='<span class="pill" style="background:var(--lav);min-width:38px;justify-content:center">'+s.number+'</span><span style="flex:1">'+esc(s.englishName)+' <span style="color:#777;font-size:12px">('+esc(s.englishNameTranslation)+')</span></span><span style="font-size:18px">'+esc(s.name)+'</span>';
+      b.onclick=()=>renderSurah(s.number);list.appendChild(b);
+    });
+  }catch{renderState("#quranContent","error",{msg:"Gagal memuat daftar surah. Cek koneksi internet.",onRetry:renderQuranHome});}
+}
+async function renderSurah(n){
+  renderState("#quranContent","loading");
+  try{
+    const d=await(await fetch("https://api.alquran.cloud/v1/surah/"+n+"/id.indonesian")).json();
+    if(d.code!==200)throw new Error("API error");
+    const s=d.data;
+    let h='<div class="nb-card" style="padding:14px;margin-bottom:14px"><button class="nb-btn small" id="backSurah"><i data-lucide="arrow-left" class="icon"></i> Daftar Surah</button>'+
+      '<h3 style="font-family:var(--font-display);margin:12px 0 4px">'+esc(s.englishName)+' · '+esc(s.name)+'</h3><div style="font-size:13px;color:#555">'+esc(s.englishNameTranslation)+' · '+s.numberOfAyahs+' ayat · '+esc(s.revelationType)+'</div></div>';
+    s.ayahs.forEach(a=>{
+      h+='<div class="ayah"><span class="ayah-num">'+a.numberInSurah+'</span><div class="ayah-arab" dir="rtl">'+esc(a.text)+'</div><div class="ayah-id">'+esc(a.edition?.text||"")+'</div></div>';
+    });
+    $("#quranContent").innerHTML=h;
+    $("#backSurah").onclick=renderQuranHome;refreshIcons();window.scrollTo(0,0);
+  }catch{renderState("#quranContent","error",{msg:"Gagal memuat ayat. Coba lagi.",onRetry:()=>renderSurah(n)});}
+}
+
+/* ================= BUILD ================= */
+const PROJECT_TYPES={
+  capacitor:{label:"Capacitor",perms:["INTERNET","ACCESS_NETWORK_STATE"]},
+  cordova:{label:"Cordova",perms:["INTERNET","ACCESS_NETWORK_STATE"]},
+  flutter:{label:"Flutter",perms:["INTERNET","ACCESS_NETWORK_STATE"]},
+  reactnative:{label:"React Native",perms:["INTERNET","ACCESS_NETWORK_STATE","VIBRATE"]},
+  webview:{label:"Capacitor WebView",perms:["INTERNET","ACCESS_NETWORK_STATE"]}
+};
+const ALL_PERMS=["INTERNET","ACCESS_NETWORK_STATE","ACCESS_FINE_LOCATION","CAMERA","RECORD_AUDIO","READ_EXTERNAL_STORAGE","WRITE_EXTERNAL_STORAGE","VIBRATE","WAKE_LOCK","POST_NOTIFICATIONS"];
+
+$("#srcZipBtn").onclick=()=>$("#zipInput").click();
+$("#srcUrlBtn").onclick=()=>{$("#urlInputWrap").classList.toggle("hidden");};
+$("#zipInput").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  fErr("#typeErr");
+  if(f.size>50*1024*1024){fErr("#typeErr","Ukuran ZIP maksimal 50 MB. File kamu "+fmtBytes(f.size)+".");return;}
+  try{
+    const zip=await JSZip.loadAsync(f);
+    const names=Object.keys(zip.files).filter(n=>!zip.files[n].dir);
+    if(!names.length){fErr("#typeErr","ZIP kosong atau tidak valid.");return;}
+    state.build.zipBase64=await blobToBase64(f);
+    state.build.zipName=f.name;state.build.sourceType="zip";state.build.url="";
+    $("#urlInputWrap").classList.add("hidden");$("#urlInput").value="";
+    $("#zipInfo").classList.remove("hidden");
+    $("#zipInfo").textContent="ZIP: "+f.name+" · "+fmtBytes(f.size)+" · "+names.length+" file";
+    let type=null;
+    if(names.some(n=>/capacitor\.config\.(ts|js|json)$/.test(n)))type="capacitor";
+    else if(names.some(n=>/(^|\/)config\.xml$/.test(n)))type="cordova";
+    else if(names.some(n=>/(^|\/)pubspec\.yaml$/.test(n)))type="flutter";
+    else if(names.some(n=>/(^|\/)app\.json$/.test(n))&&names.some(n=>/(^|\/)metro\.config\.js$/.test(n)))type="reactnative";
+    else if(names.some(n=>/(^|\/)index\.html$/.test(n)))type="webview";
+    if(!type){
+      state.build.projectType=null;
+      $("#detectedType").textContent="Tidak cocok kategori manapun";$("#detectedType").style.background="var(--red)";
+      fErr("#typeErr","Isi ZIP tidak dikenali. Yang diterima: index.html (web statis), capacitor.config.*, config.xml, pubspec.yaml, atau app.json + metro.config.js. Build tidak dipaksa — perbaiki isi ZIP atau koreksi manual.");
+      $("#correctTypeBtn").classList.remove("hidden");
+    }else{
+      state.build.projectType=type;
+      $("#detectedType").textContent=PROJECT_TYPES[type].label;$("#detectedType").style.background="var(--mint)";
+      $("#correctTypeBtn").classList.remove("hidden");renderPerms(type);drawDefaultIcon();
+    }
+    validateBuildForm();
+  }catch(err){fErr("#typeErr","ZIP tidak bisa dibaca ("+err.message+"). Pastikan file ZIP valid dan tidak rusak.");}
+};
+function blobToBase64(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=()=>rej(new Error("gagal membaca file"));r.readAsDataURL(b);});}
+$("#urlInput").oninput=()=>{
+  const v=$("#urlInput").value.trim();
+  fErr("#urlErr");
+  if(!v){state.build.url="";state.build.projectType=null;$("#detectedType").textContent="Belum ada sumber";$("#detectedType").style.background="var(--lemon)";validateBuildForm();return;}
+  try{
+    const u=new URL(v);
+    if(!/^https?:$/.test(u.protocol))throw 0;
+    state.build.url=v;state.build.sourceType="url";state.build.projectType="webview";state.build.zipBase64=null;
+    $("#zipInfo").classList.add("hidden");
+    $("#detectedType").textContent="Capacitor WebView";$("#detectedType").style.background="var(--mint)";
+    $("#correctTypeBtn").classList.remove("hidden");renderPerms("webview");drawDefaultIcon();
+  }catch{fErr("#urlErr","URL tidak valid. Harus diawali http:// atau https:// — contoh: https://situsku.com");state.build.url="";}
+  validateBuildForm();
+};
+$("#correctTypeBtn").onclick=async()=>{
+  const r=await nbModal({title:"Koreksi Tipe Project",body:"Ketik salah satu: <b>capacitor</b>, <b>cordova</b>, <b>flutter</b>, <b>reactnative</b>, atau <b>webview</b>.",input:true,value:state.build.projectType||"",okText:"Terapkan"});
+  if(r===null)return;
+  const t=r.trim().toLowerCase();
+  if(PROJECT_TYPES[t]){
+    state.build.projectType=t;
+    $("#detectedType").textContent=PROJECT_TYPES[t].label;$("#detectedType").style.background="var(--mint)";
+    fErr("#typeErr");renderPerms(t);validateBuildForm();
+  }else fErr("#typeErr","Tipe \""+esc(r)+"\" tidak dikenal. Pilihan valid: capacitor, cordova, flutter, reactnative, webview.");
+};
+function renderPerms(type){
+  const suggested=PROJECT_TYPES[type]?.perms||["INTERNET"];
+  $("#permList").innerHTML=ALL_PERMS.map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600"><input type="checkbox" class="perm-cb" value="'+p+'" '+(suggested.includes(p)?"checked":"")+'> '+p+'</label>').join("");
+}
+const getPerms=()=>$$(".perm-cb").filter(c=>c.checked).map(c=>c.value);
+
+/* icon */
+function drawDefaultIcon(){
+  const c=$("#iconPreview"),x=c.getContext("2d");
+  x.fillStyle=$("#themeColor").value||"#ffd6e0";x.fillRect(0,0,96,96);
+  x.fillStyle="#1e1e1e";x.font="bold 40px 'Archivo Black',sans-serif";x.textAlign="center";x.textBaseline="middle";
+  x.fillText(($("#appName").value.trim()[0]||"N").toUpperCase(),48,52);
+  state.build.iconDataUrl=null;state.build.iconGenerated=true;
+  $("#iconHint").textContent="Icon default dari inisial nama. Upload gambar untuk pakai icon sendiri.";
+}
+$("#uploadIconBtn").onclick=()=>$("#iconInput").click();
+$("#iconInput").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(!/^image\/(png|jpe?g|webp)$/.test(f.type)){$("#iconHint").textContent="Format gambar harus PNG, JPG, atau WebP.";return;}
+  if(f.size>5*1024*1024){$("#iconHint").textContent="Ukuran gambar maksimal 5 MB.";return;}
+  const img=new Image();
+  img.onload=()=>{
+    const oc=document.createElement("canvas");oc.width=oc.height=512;
+    const ox=oc.getContext("2d");
+    ox.fillStyle="#ffffff";ox.fillRect(0,0,512,512);
+    const r=Math.max(512/img.width,512/img.height);
+    ox.drawImage(img,(512-img.width*r)/2,(512-img.height*r)/2,img.width*r,img.height*r);
+    state.build.iconDataUrl=oc.toDataURL("image/png");state.build.iconGenerated=true;
+    const c=$("#iconPreview"),x=c.getContext("2d");
+    x.clearRect(0,0,96,96);x.drawImage(oc,0,0,96,96);
+    $("#iconHint").textContent="Icon OK — semua ukuran Android (mdpi–xxxhdpi, adaptive, maskable) digenerate saat build.";
+  };
+  img.onerror=()=>{$("#iconHint").textContent="Gambar tidak bisa dibaca. Coba file lain.";};
+  img.src=URL.createObjectURL(f);
+};
+$("#themeColor").oninput=()=>{if(!state.build.iconDataUrl)drawDefaultIcon();};
+
+/* keystore */
+$("#ksGenBtn").onclick=async()=>{
+  const r=await nbModal({title:"Generate Keystore",body:"Workflow akan generate keystore release baru. Setelah build pertama selesai, download backup-nya dan simpan baik-baik.",okText:"Generate"});
+  if(!r)return;
+  state.build.keystore={mode:"auto"};
+  $("#ksStatus").textContent="Mode: generate otomatis oleh workflow.";
+  $("#ksDlBtn").classList.add("hidden");
+  toast("Keystore mode auto dipilih.");
+};
+$("#ksUpBtn").onclick=()=>$("#ksInput").click();
+$("#ksInput").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>1024*1024){$("#ksStatus").textContent="Ukuran keystore maksimal 1 MB.";return;}
+  try{
+    state.build.keystore={mode:"upload",data:await blobToBase64(f),name:f.name};
+    $("#ksStatus").textContent="Keystore terupload: "+f.name+" ("+fmtBytes(f.size)+")";
+    $("#ksDlBtn").classList.remove("hidden");
+    toast("Keystore terupload.");
+  }catch{$("#ksStatus").textContent="Keystore tidak bisa dibaca.";}
+};
+$("#ksDlBtn").onclick=()=>{
+  if(state.build.keystore?.mode!=="upload")return;
+  const a=document.createElement("a");a.href="data:application/octet-stream;base64,"+state.build.keystore.data;
+  a.download=state.build.keystore.name||"nexabuild.keystore";a.click();
+};
+
+/* fitur opsional */
+$("#featToggle").onclick=()=>{
+  $("#featBody").classList.toggle("hidden");
+  $("#featChevron").style.transform=$("#featBody").classList.contains("hidden")?"":"rotate(180deg)";
+};
+$("#optPush").onchange=e=>$("#pushWrap").classList.toggle("hidden",!e.target.checked);
+$("#gjsonInput").onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>512*1024){$("#gjsonHint").textContent="google-services.json maksimal 512 KB.";state.build.gjson=null;return;}
+  try{
+    const t=JSON.parse(await f.text());
+    if(!t.project_info)throw 0;
+    state.build.gjson=t;$("#gjsonHint").textContent="google-services.json valid ✓";
+  }catch{state.build.gjson=null;$("#gjsonHint").textContent="File bukan google-services.json yang valid.";}
+};
+
+/* validasi */
+function validatePackageId(v){return /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(v)&&v.length<=100;}
+["#appName","#shortName","#packageId","#versionName","#versionCode"].forEach(s=>$(s).addEventListener("input",validateBuildForm));
+function validateBuildForm(){
+  let ok=true;
+  const name=$("#appName").value.trim(),sn=$("#shortName").value.trim(),pk=$("#packageId").value.trim();
+  if(name.length<2){fErr("#appNameErr","Nama aplikasi minimal 2 karakter.");ok=false;}else fErr("#appNameErr");
+  if(sn.length<2){fErr("#shortNameErr","Short name minimal 2 karakter.");ok=false;}else fErr("#shortNameErr");
+  if(!validatePackageId(pk)){fErr("#packageIdErr","Format package ID: com.nama.app — huruf kecil semua, diawali huruf, minimal 2 segmen dipisah titik.");ok=false;}else fErr("#packageIdErr");
+  if(!state.build.projectType)ok=false;
+  $("#buildBtn").disabled=!ok||state.build.running;
+  return ok;
+}
+async function nextVersionCode(){
+  if($("#versionCode").value)return;
+  try{
+    const d=await gh("/repos/"+state.repo+"/contents/builds.json");
+    state.builds=JSON.parse(atob(d.content.replace(/\n/g,""))).builds||[];
+    const last=state.builds.reduce((m,b)=>Math.max(m,b.versionCode||0),0);
+    $("#versionCode").value=last+1;
+    if(!$("#versionName").value)$("#versionName").value="1.0."+last;
+  }catch{
+    $("#versionCode").value=1;
+    if(!$("#versionName").value)$("#versionName").value="1.0.0";
+  }
+}
+
+/* trigger build */
+$("#buildBtn").onclick=()=>startBuild(false,null);
+async function startBuild(isRebuild,existingConfig){
+  if(state.build.running)return;
+  if(!validateBuildForm()){toast("Lengkapi identitas aplikasi dulu.");return;}
+  const btn=$("#buildBtn");btn.disabled=true;state.build.running=true;
+  btn.innerHTML='<span class="spinner inline"></span> Build berjalan…';
+  $("#terminalWrap").classList.remove("hidden");$("#dlWrap").classList.add("hidden");$("#buildFail").classList.add("hidden");
+  $("#termBody").innerHTML="";termLog("info","Menyiapkan konfigurasi build…");
+  try{
+    const cfg=existingConfig||collectConfig();
+    termLog("info","Mengunggah config ke repo "+state.repo+" …");
+    await upsertFile("nexabuild.config.json",JSON.stringify(cfg,null,2),"NexaBuild: build config v"+cfg.versionCode);
+    termLog("info","Memicu GitHub Actions…");
+    await gh("/repos/"+state.repo+"/actions/workflows/build.yml/dispatches",{method:"POST",body:{ref:"main"}});
+    termLog("success","Workflow dipicu. Mencari run ID…");
+    await new Promise(r=>setTimeout(r,5000));
+    const runs=await gh("/repos/"+state.repo+"/actions/runs?per_page=5");
+    const run=runs.workflow_runs.find(w=>/nexabuild/i.test(w.name||""))||runs.workflow_runs[0];
+    if(!run)throw new Error("Run workflow tidak ditemukan dalam 5 detik. Cek tab Actions di repo GitHub kamu — kemungkinan workflow sedang antre.");
+    state.build.runId=run.id;
+    termLog("info","Run ID: "+run.id+" — memantau progres…");
+    pollRun(run.id,cfg);
+  }catch(e){
+    termLog("error",friendlyError(e,"build"));
+    state.build.running=false;btn.disabled=false;
+    btn.innerHTML='<i data-lucide="hammer" class="icon"></i> Build APK';refreshIcons();
+    toast("Build gagal dimulai: "+friendlyError(e,"build"));
+  }
+}
+function collectConfig(){
+  return{
+    appName:$("#appName").value.trim(),shortName:$("#shortName").value.trim(),packageId:$("#packageId").value.trim(),
+    versionName:$("#versionName").value.trim()||"1.0.0",versionCode:+$("#versionCode").value||1,
+    projectType:state.build.projectType,sourceType:state.build.sourceType,url:state.build.url,
+    zipBase64:state.build.zipBase64,zipName:state.build.zipName,
+    iconDataUrl:state.build.iconDataUrl,iconGenerated:state.build.iconGenerated,
+    permissions:getPerms(),
+    splashText:$("#splashText").value.trim()||$("#appName").value.trim(),
+    orientation:$("#orientation").value,themeColor:$("#themeColor").value,
+    webview:{zoom:$("#optZoom").checked,pullToRefresh:$("#optPull").checked,backToClose:$("#optBack").checked,offlinePage:$("#optOffline").checked},
+    privacyUrl:$("#privacyUrl").value.trim(),
+    push:{enabled:$("#optPush").checked,gjson:state.build.gjson},
+    login:{enabled:$("#optLogin").checked,note:"Chrome Custom Tabs wajib — Google blokir OAuth via WebView sejak 2016"},
+    keystore:state.build.keystore?{mode:state.build.keystore.mode,data:state.build.keystore.mode==="upload"?state.build.keystore.data:undefined,name:state.build.keystore.name}:null,
+    whitelist:$("#whitelist").value.split("\n").map(s=>s.trim()).filter(Boolean)
+  };
+}
+async function upsertFile(path,content,message){
+  let sha;
+  try{const f=await gh("/repos/"+state.repo+"/contents/"+path);sha=f.sha;}catch{}
+  await gh("/repos/"+state.repo+"/contents/"+path,{method:"PUT",body:{message,content:btoa(unescape(encodeURIComponent(content))),sha,branch:"main"}});
+}
+function termLog(level,msg){
+  const colors={info:"#8ecbff",success:"#7ee2a8",warning:"#ffd166",error:"#ff9d9d"};
+  const d=document.createElement("div");d.style.color=colors[level]||"#e8e8e8";
+  d.textContent="["+new Date().toLocaleTimeString()+"] "+msg;
+  const b=$("#termBody");b.appendChild(d);b.scrollTop=b.scrollHeight;
+}
+function startTimer(){
+  const t0=Date.now();clearInterval(state.build.timerInt);
+  state.build.timerInt=setInterval(()=>{
+    const s=Math.floor((Date.now()-t0)/1000);
+    $("#termTimer").textContent=String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0");
+  },1000);
+}
+async function pollRun(runId,cfg){
+  startTimer();let lastLogLen=0;
+  state.build.pollInt=setInterval(async()=>{
+    try{
+      const run=await gh("/repos/"+state.repo+"/actions/runs/"+runId);
+      const jobs=await gh("/repos/"+state.repo+"/actions/runs/"+runId+"/jobs").catch(()=>null);
+      if(jobs&&jobs.jobs[0]){
+        const job=jobs.jobs[0];
+        const step=job.steps.find(s=>s.status==="in_progress");
+        $("#termStatus").textContent=job.status==="completed"?(job.conclusion==="success"?"Sukses ✓":"Gagal ✗"):(step?step.name:"Berjalan…");
+        if(job.status==="completed"&&job.conclusion!=="success"){
+          const logs=await gh("/repos/"+state.repo+"/actions/jobs/"+job.id+"/logs",{raw:true}).catch(()=>"");
+          const tail=logs.slice(-3000);
+          if(tail.length>lastLogLen){tail.slice(lastLogLen).split("\n").filter(Boolean).slice(-12).forEach(l=>{
+            const lv=/error|failed|✗|FAIL/i.test(l)?"error":/warning|WARN/i.test(l)?"warning":/success|✓|BUILD SUCCESSFUL/i.test(l)?"success":"info";
+            termLog(lv,l.slice(0,180));
+          });lastLogLen=tail.length;}
+        }
+      }else{
+        $("#termStatus").textContent=run.status==="queued"?"Antre…":"Berjalan…";
+      }
+      if(run.status==="completed"){
+        clearInterval(state.build.pollInt);clearInterval(state.build.timerInt);
+        finishBuild(run,cfg);
+      }
+    }catch(e){termLog("warning","Polling terhambat: "+friendlyError(e,"poll"));}
+  },6000);
+}
+async function finishBuild(run,cfg){
+  const btn=$("#buildBtn");state.build.running=false;btn.disabled=false;
+  btn.innerHTML='<i data-lucide="hammer" class="icon"></i> Build APK';refreshIcons();
+  cfg.status=run.conclusion==="success"?"success":"failed";
+  cfg.builtAt=new Date().toISOString();
+  if(run.conclusion==="success"){
+    termLog("success","Build selesai sukses!");
+    try{
+      const rel=await gh("/repos/"+state.repo+"/releases/tags/v"+cfg.versionName+"-"+cfg.versionCode);
+      const apk=rel.assets.find(a=>a.name.endsWith(".apk")),aab=rel.assets.find(a=>a.name.endsWith(".aab"));
+      if(apk)$("#dlApk").href=apk.browser_download_url;
+      if(aab)$("#dlAab").href=aab.browser_download_url;
+      if(apk||aab){$("#dlWrap").classList.remove("hidden");toast("Build sukses! APK & AAB siap diunduh.");}
+      else toast("Build sukses, tapi tidak menemukan file APK/AAB di release.");
+    }catch{toast("Build sukses, tapi gagal membaca release. Cek langsung di repo → Releases.");}
+  }else{
+    termLog("error","Build gagal. Detail lengkap di tab Actions repo kamu.");
+    $("#buildFail").classList.remove("hidden");
+    $("#buildFailMsg").textContent="Buka github.com/"+state.repo+"/actions → run terbaru untuk log lengkap.";
+    toast("Build gagal. Cek log di GitHub Actions.");
+  }
+  await saveBuildRecord(cfg).catch(()=>{});
+}
+async function saveBuildRecord(cfg){
+  let builds=[],sha;
+  try{const f=await gh("/repos/"+state.repo+"/contents/builds.json");sha=f.sha;builds=(JSON.parse(atob(f.content.replace(/\n/g,""))).builds)||[];}catch{}
+  builds.unshift({id:Date.now(),appName:cfg.appName,shortName:cfg.shortName,packageId:cfg.packageId,versionName:cfg.versionName,versionCode:cfg.versionCode,projectType:cfg.projectType,status:cfg.status,builtAt:cfg.builtAt,iconDataUrl:cfg.iconDataUrl,config:cfg});
+  await gh("/repos/"+state.repo+"/contents/builds.json",{method:"PUT",body:{message:"NexaBuild: update builds.json",content:btoa(unescape(encodeURIComponent(JSON.stringify({builds},null,2)))),sha,branch:"main"}});
+  state.builds=builds;
+}
+</script>
+<script>
+"use strict";
+/* ================= EDIT ================= */
+async function loadBuilds(){
+  try{
+    const f=await gh("/repos/"+state.repo+"/contents/builds.json");
+    state.builds=(JSON.parse(atob(f.content.replace(/\n/g,""))).builds)||[];
+  }catch{state.builds=[];}
+}
+function renderEditList(){
+  const c=$("#editList");
+  if(!state.builds.length){renderState("#editList","empty",{msg:"Belum ada app yang pernah dibuild. Mulai dari tab Build."});return;}
+  c.innerHTML="";
+  state.builds.forEach(b=>{
+    const el=document.createElement("div");
+    el.className="nb-card";el.style.cssText="display:flex;gap:12px;align-items:center;padding:12px;margin-bottom:12px";
+    const img=b.iconDataUrl?('<img src="'+b.iconDataUrl+'" style="width:52px;height:52px;border:var(--border);border-radius:10px;object-fit:cover">'):('<div style="width:52px;height:52px;border:var(--border);border-radius:10px;background:var(--lav);display:flex;align-items:center;justify-content:center;font-family:var(--font-display)">'+esc(b.appName[0]||"?")+'</div>');
+    el.innerHTML=img+'<div style="flex:1;min-width:0"><div style="font-weight:700">'+esc(b.appName)+' <span style="font-size:12px;color:#555">v'+esc(b.versionName)+' ('+b.versionCode+')</span></div>'+
+      '<div style="font-size:12px;color:#555">'+esc(PROJECT_TYPES[b.projectType]?.label||b.projectType)+' · <span style="color:'+(b.status==="success"?"#1a7f4b":"var(--err)")+';font-weight:700">'+esc(b.status)+'</span></div></div>'+
+      '<button class="nb-btn small">Edit &amp; Build Ulang</button>';
+    el.querySelector("button").onclick=()=>loadToForm(b);
+    c.appendChild(el);
+  });
+}
+function loadToForm(b){
+  const cfg=b.config||{};
+  showModule("build");
+  $("#appName").value=cfg.appName||"";$("#shortName").value=cfg.shortName||"";
+  $("#packageId").value=cfg.packageId||"";$("#versionName").value=cfg.versionName||"";
+  $("#versionCode").value=(b.versionCode||0)+1;
+  state.build.projectType=cfg.projectType;state.build.sourceType=cfg.sourceType;
+  state.build.url=cfg.url||"";
+  if(cfg.url){$("#urlInput").value=cfg.url;$("#urlInputWrap").classList.remove("hidden");}
+  if(cfg.zipBase64){state.build.zipBase64=cfg.zipBase64;state.build.zipName=cfg.zipName;$("#zipInfo").classList.remove("hidden");$("#zipInfo").textContent="ZIP (dari riwayat): "+cfg.zipName;}
+  $("#detectedType").textContent=PROJECT_TYPES[cfg.projectType]?.label||cfg.projectType;$("#detectedType").style.background="var(--mint)";$("#correctTypeBtn").classList.remove("hidden");
+  renderPerms(cfg.projectType||"webview");
+  (cfg.permissions||[]).forEach(p=>{const cb=$$(".perm-cb").find(c=>c.value===p);if(cb)cb.checked=true;});
+  $("#splashText").value=cfg.splashText||"";$("#orientation").value=cfg.orientation||"portrait";$("#themeColor").value=cfg.themeColor||"#ffd6e0";
+  if(cfg.webview){$("#optZoom").checked=!!cfg.webview.zoom;$("#optPull").checked=!!cfg.webview.pullToRefresh;$("#optBack").checked=!!cfg.webview.backToClose;$("#optOffline").checked=!!cfg.webview.offlinePage;}
+  $("#privacyUrl").value=cfg.privacyUrl||"";$("#optPush").checked=!!cfg.push?.enabled;
+  if(cfg.push?.gjson)state.build.gjson=cfg.push.gjson;
+  $("#optLogin").checked=!!cfg.login?.enabled;
+  $("#whitelist").value=(cfg.whitelist||[]).join("\n");
+  if(cfg.keystore)state.build.keystore={mode:cfg.keystore.mode,data:cfg.keystore.data,name:cfg.keystore.name};
+  if(cfg.iconDataUrl){
+    state.build.iconDataUrl=cfg.iconDataUrl;
+    const c=$("#iconPreview"),x=c.getContext("2d"),im=new Image();
+    im.onload=()=>{x.clearRect(0,0,96,96);x.drawImage(im,0,0,96,96);};
+    im.src=cfg.iconDataUrl;
+    $("#iconHint").textContent="Icon dari riwayat build.";
+  }else drawDefaultIcon();
+  validateBuildForm();
+  nbModal({title:"Config dimuat",body:"Semua konfigurasi <b>"+esc(b.appName)+"</b> sudah dimuat ke form Build. Version code sudah di-increment otomatis. Klik Build APK untuk build ulang.",okText:"OK"});
+}
+
+/* ================= CHAT ================= */
+let chatInt=null,chatLastId=0,chatSending=false;
+function startChatIfReady(){
+  clearInterval(chatInt);
+  if(!state.issue){
+    $("#chatIssueWarn").classList.remove("hidden");$("#chatBox").classList.add("hidden");
+    renderState("#chatState","empty",{msg:"Isi nomor issue dulu lewat menu (≡) → Issue Chat Global."});
+    return;
+  }
+  $("#chatIssueWarn").classList.add("hidden");$("#chatState").innerHTML="";$("#chatBox").classList.remove("hidden");
+  renderState("#chatState","loading");loadChat(true);
+  chatInt=setInterval(()=>loadChat(false),8000);
+}
+async function loadChat(first){
+  try{
+    const d=await gh("/repos/"+state.repo+"/issues/"+state.issue+"/comments?per_page=100");
+    renderState("#chatState","");
+    const box=$("#chatMessages");
+    if(first){box.innerHTML="";chatLastId=0;}
+    if(!d.length&&first){box.innerHTML='<div class="state-box" style="margin:auto">Belum ada pesan. Jadilah yang pertama!</div>';}
+    const fresh=d.filter(c=>c.id>chatLastId);
+    fresh.forEach(c=>{
+      chatLastId=Math.max(chatLastId,c.id);
+      const mine=c.user.login===state.user.login;
+      const row=document.createElement("div");
+      row.style.cssText="display:flex;gap:8px;"+(mine?"flex-direction:row-reverse;":"");
+      row.innerHTML='<img src="'+esc(c.user.avatar_url)+'" style="width:32px;height:32px;border:var(--border);border-radius:8px;flex:none">'+
+        '<div style="max-width:75%"><div style="font-size:11px;font-weight:700;color:#666;margin-bottom:3px;'+(mine?"text-align:right;":"")+'">'+esc(c.user.login)+" · "+relTime(c.created_at)+'</div>'+
+        '<div style="border:var(--border);border-radius:12px;padding:9px 13px;font-size:14px;box-shadow:var(--shadow-sm);background:'+(mine?"var(--mint)":"var(--surface)")+';'+(mine?"border-bottom-right-radius:3px;":"border-bottom-left-radius:3px;")+'">'+esc(c.body)+'</div></div>';
+      box.appendChild(row);
+    });
+    if(fresh.length)box.scrollTop=box.scrollHeight;
+  }catch(e){
+    if(first)renderState("#chatState","error",{msg:friendlyError(e,"chat"),onRetry:()=>startChatIfReady()});
+  }
+}
+function relTime(iso){
+  const s=Math.max(0,(Date.now()-new Date(iso).getTime())/1000);
+  if(s<60)return"baru saja";
+  if(s<3600)return Math.floor(s/60)+" menit lalu";
+  if(s<86400)return Math.floor(s/3600)+" jam lalu";
+  return Math.floor(s/86400)+" hari lalu";
+}
+async function sendChat(){
+  const t=$("#chatInput").value.trim();
+  if(!t||chatSending)return;
+  chatSending=true;const btn=$("#chatSend");btn.disabled=true;
+  try{
+    await gh("/repos/"+state.repo+"/issues/"+state.issue+"/comments",{method:"POST",body:{body:t}});
+    $("#chatInput").value="";loadChat(false);
+  }catch(e){
+    nbModal({title:"Pesan gagal terkirim",body:esc(friendlyError(e,"chat")),okText:"OK"});
+  }
+  chatSending=false;btn.disabled=false;
+}
+$("#chatSend").onclick=sendChat;
+$("#chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
+
+/* ================= BOOT ================= */
+refreshIcons();
+if(state.token&&state.repo&&state.user){
+  $("#authScreen").classList.add("hidden");
+  $("#appShell").style.display="block";
+  $("#homeAvatar").src=state.user.avatar;
+  $("#homeName").textContent=state.user.name;
+  $("#homeRole").textContent=state.profile.role||"Developer";
+  refreshIcons();initHome();loadBuilds();startChatIfReady();
+  gh("/user").then(u=>{
+    state.user={login:u.login,name:u.name||u.login,avatar:u.avatar_url};
+    LS.set("user",state.user);
+    $("#homeAvatar").src=state.user.avatar;$("#homeName").textContent=state.user.name;
+  }).catch(()=>{});
+}else{
+  showAuthStep(1);
+}
+</script>
+</body>
+</html>
