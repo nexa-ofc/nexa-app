@@ -6,156 +6,200 @@
 <title>NexaBuild — Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
 :root{
-  --bg:#fdf6ec; --surface:#ffffff; --ink:#1e1e1e;
+  --bg:#f4f1e8; --surface:#ffffff; --ink:#14210f;
+  --green:#1a3c0f; --green-mid:#2d5a1e; --green-soft:#dcead3; --green-pale:#eef5e6;
   --pink:#ffd6e0; --mint:#c9f2d8; --sky:#cfe4ff; --lav:#e3d9ff; --peach:#ffe3c7; --lemon:#fff3b0;
-  --green:#7ee2a8; --red:#ff9d9d; --amber:#ffd166; --err:#d63031;
-  --radius:10px; --border:2.5px solid var(--ink);
-  --shadow:5px 5px 0 var(--ink); --shadow-sm:3px 3px 0 var(--ink);
-  --font-display:'Archivo Black',sans-serif; --font-body:'Space Grotesk',sans-serif;
+  --red:#ff9d9d; --err:#c0392b; --ok:#1a7f4b;
+  --radius:6px; --border:3px solid var(--ink);
+  --shadow:6px 6px 0 var(--green); --shadow-sm:3px 3px 0 var(--green);
+  --font-display:'Creepster',cursive; --font-body:'Space Grotesk',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-behavior:smooth}
-body{font-family:var(--font-body);background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:86px}
+body{
+  font-family:var(--font-body);color:var(--ink);min-height:100vh;padding-bottom:92px;
+  background-color:var(--bg);
+  background-image:
+    linear-gradient(rgba(26,60,15,.07) 1.5px, transparent 1.5px),
+    linear-gradient(90deg, rgba(26,60,15,.07) 1.5px, transparent 1.5px);
+  background-size:28px 28px;
+}
 button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:15px}
-:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+:focus{outline:none}
+:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 .hidden{display:none!important}
 
 .nb-card{background:var(--surface);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
-.nb-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--surface);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);padding:12px 18px;font-weight:700;font-size:15px;color:var(--ink);transition:transform .12s,box-shadow .12s;text-decoration:none}
-.nb-btn:hover,.nb-btn:focus-visible,.nb-btn:active{box-shadow:var(--shadow);transform:translate(-2px,-2px)}
-.nb-btn:active{transform:translate(1px,1px);box-shadow:2px 2px 0 var(--ink)}
-.nb-btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:var(--shadow-sm);transform:none}
-.nb-btn.primary{background:var(--mint)}
+.nb-btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--surface);border:var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);padding:13px 20px;font-weight:700;font-size:15px;color:var(--ink);
+  transition:transform .1s,box-shadow .1s,background .1s;text-decoration:none;
+}
+.nb-btn:hover,.nb-btn:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px);background:var(--green-pale)}
+.nb-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--green)}
+.nb-btn:disabled{opacity:.4;cursor:not-allowed;box-shadow:var(--shadow-sm);transform:none}
+.nb-btn.primary{background:var(--green);color:#f4f1e8}
+.nb-btn.primary:hover,.nb-btn.primary:focus-visible{background:var(--green-mid)}
 .nb-btn.danger{background:var(--red)}
-.nb-btn.warn{background:var(--amber)}
-.nb-btn.small{padding:8px 12px;font-size:13px}
-.nb-input{width:100%;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:12px 14px;font-size:15px;box-shadow:var(--shadow-sm);transition:box-shadow .12s,transform .12s}
-.nb-input:hover,.nb-input:focus{box-shadow:var(--shadow);transform:translate(-1px,-1px)}
-.nb-input.invalid{border-color:var(--err);background:#fff3f3}
-.field-label{display:block;font-weight:700;font-size:13px;margin:0 0 6px 2px;text-transform:uppercase;letter-spacing:.04em}
-.field-hint{font-size:12px;color:#555;margin-top:5px}
-.field-error{display:none;font-size:12.5px;color:var(--err);margin-top:6px;font-weight:600;background:#ffe9e9;border:2px solid var(--err);border-radius:8px;padding:8px 10px;line-height:1.5}
-.field-error.show{display:block}
-.field-ok{display:none;font-size:12.5px;color:#1a7f4b;margin-top:6px;font-weight:600;background:var(--mint);border:2px solid var(--ink);border-radius:8px;padding:8px 10px}
-.field-ok.show{display:block}
-.pill{display:inline-flex;align-items:center;gap:6px;border:var(--border);border-radius:999px;padding:6px 14px;font-size:12.5px;font-weight:700;white-space:nowrap;background:var(--surface)}
-.section-title{font-family:var(--font-display);font-size:20px;margin:0 0 14px}
+.nb-btn.warn{background:var(--lemon)}
+.nb-btn.small{padding:9px 13px;font-size:13px}
+.nb-input{
+  width:100%;background:var(--surface);border:var(--border);border-radius:var(--radius);
+  padding:13px 15px;font-size:15px;box-shadow:var(--shadow-sm);color:var(--ink);
+  transition:transform .1s,box-shadow .1s,border-color .1s;
+}
+.nb-input:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--green)}
+.nb-input:focus{transform:translate(-2px,-2px);box-shadow:var(--shadow);border-color:var(--green)}
+.nb-input.invalid{border-color:var(--err);background:#fdf0ee}
+.field-label{display:block;font-weight:700;font-size:12.5px;margin:0 0 7px 2px;text-transform:uppercase;letter-spacing:.07em;color:var(--green)}
+.field-hint{font-size:12.5px;color:#4a5a42;margin-top:6px;line-height:1.5}
+.field-error{display:none;font-size:13px;color:var(--err);margin-top:8px;font-weight:600;background:#fdeceb;border:2.5px solid var(--err);border-radius:var(--radius);padding:10px 12px;line-height:1.55}
+.field-error.show{display:block;animation:popIn .2s ease}
+.field-ok{display:none;font-size:13px;color:var(--ok);margin-top:8px;font-weight:600;background:var(--green-soft);border:2.5px solid var(--green);border-radius:var(--radius);padding:10px 12px}
+.field-ok.show{display:block;animation:popIn .2s ease}
+@keyframes popIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.pill{display:inline-flex;align-items:center;gap:6px;border:var(--border);border-radius:999px;padding:6px 15px;font-size:12.5px;font-weight:700;white-space:nowrap;background:var(--surface)}
+.section-title{font-family:var(--font-display);font-size:26px;margin:0 0 16px;color:var(--green);letter-spacing:1px}
 .icon{width:20px;height:20px;flex:none}
 
-.skeleton{border-radius:var(--radius);background:linear-gradient(90deg,#eee 25%,#f7f7f7 50%,#eee 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border:var(--border)}
+.skeleton{border-radius:var(--radius);background:linear-gradient(90deg,#e8e4d8 25%,#f5f2ea 50%,#e8e4d8 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border:var(--border)}
 @keyframes shimmer{to{background-position:-200% 0}}
-.state-box{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:22px;text-align:center;font-size:14px}
-.state-box .nb-btn{margin-top:12px}
-.spinner{width:26px;height:26px;border:3px solid var(--ink);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
-.spinner.inline{width:16px;height:16px;border-width:2.5px;margin:0;display:inline-block;vertical-align:-3px}
+.state-box{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:24px;text-align:center;font-size:14px;line-height:1.6}
+.state-box .nb-btn{margin-top:14px}
+.spinner{width:26px;height:26px;border:3.5px solid var(--green);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+.spinner.inline{width:16px;height:16px;border-width:2.5px;margin:0;display:inline-block;vertical-align:-3px;border-color:#f4f1e8;border-top-color:transparent}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-#offlineBanner{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--red);border-bottom:var(--border);padding:10px 16px;font-weight:700;font-size:13px;text-align:center;display:none}
-#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);border:var(--border);border-radius:var(--radius);padding:12px 18px;font-weight:700;font-size:13.5px;z-index:400;opacity:0;pointer-events:none;transition:all .25s;max-width:90vw;text-align:center}
+#offlineBanner{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--red);border-bottom:var(--border);padding:10px 16px;font-weight:700;font-size:13px;text-align:center}
+#toast{position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(24px);background:var(--green);color:#f4f1e8;border:var(--border);border-radius:var(--radius);padding:13px 20px;font-weight:700;font-size:13.5px;z-index:400;opacity:0;pointer-events:none;transition:all .25s;max-width:90vw;text-align:center;box-shadow:var(--shadow-sm)}
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
-#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
-.auth-card{width:100%;max-width:440px;padding:28px}
-.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.auth-logo svg{width:52px;height:52px}
-.wordmark{font-family:var(--font-display);font-size:26px;letter-spacing:-.5px}
-.auth-field{margin-bottom:14px}
-.auth-user{display:flex;align-items:center;gap:12px;border:var(--border);border-radius:var(--radius);padding:10px;background:var(--mint);margin:14px 0}
-.auth-user img{width:44px;height:44px;border-radius:8px;border:var(--border)}
-.scope-note{font-size:12px;color:#555;background:var(--lemon);border:var(--border);border-radius:var(--radius);padding:10px 12px;margin-top:14px;line-height:1.5}
+/* ---------- AUTH ---------- */
+#authScreen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:22px}
+.auth-card{width:100%;max-width:460px;padding:30px;animation:cardIn .35s ease}
+@keyframes cardIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.auth-logo svg{width:58px;height:58px;flex:none}
+.wordmark{font-family:var(--font-display);font-size:32px;color:var(--green);letter-spacing:1.5px;line-height:1}
+.auth-sub{font-size:13px;font-weight:600;color:#4a5a42;margin-top:5px}
+.auth-field{margin-bottom:16px}
+.auth-user{display:flex;align-items:center;gap:12px;border:var(--border);border-radius:var(--radius);padding:11px;background:var(--green-soft);margin:16px 0;box-shadow:var(--shadow-sm)}
+.auth-user img{width:46px;height:46px;border-radius:8px;border:var(--border)}
+.scope-note{font-size:12.5px;color:#3a4a32;background:var(--lemon);border:var(--border);border-radius:var(--radius);padding:11px 13px;margin-top:16px;line-height:1.6}
+.step-badge{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;background:var(--green);color:#f4f1e8;border:var(--border);border-radius:999px;padding:4px 12px;margin-bottom:14px;letter-spacing:.05em}
 
+/* ---------- SHELL ---------- */
 #appShell{display:none}
-#topbar{position:sticky;top:0;z-index:90;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border-bottom:var(--border);padding:12px 16px}
-#topbar .wordmark{font-size:20px}
-.topbar-logo svg{width:34px;height:34px;display:block}
+#topbar{position:sticky;top:0;z-index:90;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(244,241,232,.92);backdrop-filter:blur(8px);border-bottom:var(--border);padding:12px 16px}
+#topbar .wordmark{font-size:24px}
+.topbar-logo svg{width:36px;height:36px;display:block}
 
-#drawerOverlay{position:fixed;inset:0;background:rgba(30,30,30,.45);z-index:150;display:none}
-#drawer{position:fixed;top:0;left:0;bottom:0;width:min(320px,85vw);background:var(--surface);border-right:var(--border);z-index:160;transform:translateX(-105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+#drawerOverlay{position:fixed;inset:0;background:rgba(20,33,15,.5);z-index:150;display:none}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:min(320px,85vw);background:var(--surface);border-right:var(--border);z-index:160;transform:translateX(-105%);transition:transform .25s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column;box-shadow:6px 0 0 rgba(26,60,15,.15)}
 #drawer.open{transform:translateX(0)}
-.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:var(--border)}
-.drawer-nav{flex:1;overflow-y:auto;padding:12px}
-.drawer-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px;font-weight:600;font-size:15px;box-shadow:var(--shadow-sm);transition:box-shadow .12s,transform .12s}
-.drawer-item:hover,.drawer-item:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px);background:var(--lav)}
+.drawer-head{display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:var(--border);background:var(--green-pale)}
+.drawer-nav{flex:1;overflow-y:auto;padding:14px}
+.drawer-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:14px;margin-bottom:11px;font-weight:600;font-size:15px;box-shadow:var(--shadow-sm);transition:transform .1s,box-shadow .1s,background .1s}
+.drawer-item:hover,.drawer-item:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px);background:var(--green-soft)}
 
 .ticker-wrap{overflow:hidden;border-bottom:var(--border);background:var(--surface)}
-.ticker{display:flex;gap:10px;padding:10px 0;width:max-content;animation:marquee 28s linear infinite}
+.ticker{display:flex;gap:10px;padding:10px 0;width:max-content;animation:marquee 30s linear infinite}
 .ticker:hover{animation-play-state:paused}
 @keyframes marquee{to{transform:translateX(-50%)}}
 
-#bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:120;display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:var(--border);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:var(--border);border-radius:var(--radius);padding:9px 4px;font-size:11.5px;font-weight:700;color:var(--ink);transition:all .12s}
+#bottomNav{position:fixed;left:0;right:0;bottom:0;z-index:120;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--surface);border-top:var(--border);padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:var(--border);border-radius:var(--radius);padding:9px 4px;font-size:11.5px;font-weight:700;color:var(--ink);transition:all .1s}
 .nav-item:hover,.nav-item:focus-visible{box-shadow:var(--shadow-sm);transform:translateY(-2px)}
-.nav-item.active{background:var(--ink);color:var(--bg);box-shadow:var(--shadow-sm)}
+.nav-item.active{background:var(--green);color:#f4f1e8;box-shadow:var(--shadow-sm)}
 
+/* ---------- HOME ---------- */
 .module{padding:16px;max-width:720px;margin:0 auto}
-.account-bar{display:flex;align-items:center;gap:12px;padding:14px;margin-bottom:14px}
-.account-bar img{width:52px;height:52px;border-radius:10px;border:var(--border)}
-.acc-name{font-weight:700;font-size:16px}
-.acc-role{font-size:12.5px;color:#555;font-weight:600}
-.acc-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
-.dot{width:12px;height:12px;border-radius:50%;border:2px solid var(--ink)}
-.dot.on{background:var(--green)}.dot.off{background:var(--red)}
-.weather-chip{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:var(--sky);border:var(--border);border-radius:999px;padding:4px 10px}
+.account-bar{display:flex;align-items:center;gap:13px;padding:15px;margin-bottom:14px}
+.account-bar img{width:54px;height:54px;border-radius:8px;border:var(--border)}
+.acc-name{font-weight:700;font-size:16.5px}
+.acc-role{font-size:12.5px;color:#4a5a42;font-weight:600}
+.acc-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:7px}
+.dot{width:12px;height:12px;border-radius:50%;border:2.5px solid var(--ink)}
+.dot.on{background:var(--ok)}.dot.off{background:var(--err)}
+.weather-chip{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;background:var(--sky);border:var(--border);border-radius:999px;padding:4px 11px}
 #introVideo{width:100%;display:block;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);background:#000;margin-bottom:14px}
 .indicator-stack{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
-.indicator{display:flex;align-items:center;gap:12px;padding:12px 14px;font-size:13.5px;font-weight:600}
-.indicator .bar{flex:1;height:10px;border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:#fff}
-.indicator .bar>i{display:block;height:100%;background:var(--mint);transition:width .4s}
+.indicator{display:flex;align-items:center;gap:12px;padding:13px 15px;font-size:13.5px;font-weight:600}
+.indicator .bar{flex:1;height:11px;border:2.5px solid var(--ink);border-radius:5px;overflow:hidden;background:#fff}
+.indicator .bar>i{display:block;height:100%;background:var(--green-mid);transition:width .4s}
 .home-bottom{display:flex;align-items:stretch;gap:12px}
-#clockBox{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;padding:14px}
-#quranBox{width:96px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--lav);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);font-weight:700;font-size:12px;transition:box-shadow .12s,transform .12s}
+#clockBox{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:26px;padding:14px;color:var(--green);letter-spacing:2px}
+#quranBox{width:100px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--lav);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);font-weight:700;font-size:12px;transition:transform .1s,box-shadow .1s}
 #quranBox:hover,#quranBox:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px)}
 
-.quran-list-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:10px;box-shadow:var(--shadow-sm);font-weight:600;transition:box-shadow .12s,transform .12s}
+.quran-list-item{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:13px 14px;margin-bottom:10px;box-shadow:var(--shadow-sm);font-weight:600;transition:transform .1s,box-shadow .1s,background .1s}
 .quran-list-item:hover,.quran-list-item:focus-visible{box-shadow:var(--shadow);transform:translate(-2px,-2px);background:var(--peach)}
-.ayah{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:14px;margin-bottom:12px}
-.ayah-arab{font-size:22px;line-height:2.1;text-align:right;direction:rtl;margin-bottom:10px}
-.ayah-id{font-size:14px;color:#444;line-height:1.6}
-.ayah-num{display:inline-flex;align-items:center;justify-content:center;min-width:28px;height:28px;border:var(--border);border-radius:8px;background:var(--lemon);font-weight:700;font-size:12px;margin-bottom:8px}
+.ayah{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:15px;margin-bottom:12px}
+.ayah-arab{font-size:23px;line-height:2.1;text-align:right;direction:rtl;margin-bottom:10px}
+.ayah-id{font-size:14px;color:#444;line-height:1.65}
+.ayah-num{display:inline-flex;align-items:center;justify-content:center;min-width:30px;height:30px;border:var(--border);border-radius:6px;background:var(--lemon);font-weight:700;font-size:12.5px;margin-bottom:9px}
 
-#modalOverlay{position:fixed;inset:0;background:rgba(30,30,30,.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+/* ---------- BUILD ---------- */
+.build-step{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:16px;margin-bottom:14px}
+.build-step-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border:var(--border);border-radius:6px;background:var(--green);color:#f4f1e8;font-weight:700;font-size:14px;flex:none}
+.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.perm-grid label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;background:var(--green-pale);border:2px solid var(--ink);border-radius:var(--radius);padding:9px 10px;cursor:pointer;transition:background .1s}
+.perm-grid label:has(input:checked){background:var(--green-soft)}
+.perm-grid input{accent-color:var(--green);width:16px;height:16px}
+#iconPreview{border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);background:#fff}
+.opt-panel{border:var(--border);border-radius:var(--radius);background:var(--green-pale);padding:14px;margin-bottom:12px}
+.opt-panel-title{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--green);margin-bottom:10px}
+.check-row{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:600;margin-bottom:9px;cursor:pointer}
+.check-row input{accent-color:var(--green);width:17px;height:17px}
+#termBody{background:#101a0b;color:#d8e8cf;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;padding:14px;height:300px;overflow-y:auto}
+
+#modalOverlay{position:fixed;inset:0;background:rgba(20,33,15,.55);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.chat-bubble{border:var(--border);border-radius:14px;padding:10px 14px;font-size:14px;box-shadow:var(--shadow-sm);line-height:1.5;word-break:break-word}
+@media(max-width:420px){.perm-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<div id="offlineBanner">Koneksi internet terputus. Beberapa fitur tidak berfungsi.</div>
+<div id="offlineBanner" class="hidden">Koneksi internet terputus. Beberapa fitur tidak berfungsi.</div>
 <div id="toast"></div>
 
 <!-- ================= AUTH ================= -->
 <div id="authScreen">
   <div class="nb-card auth-card">
     <div class="auth-logo">
-      <svg viewBox="0 0 64 64" aria-label="NexaBuild logo"><rect x="4" y="4" width="56" height="56" rx="10" fill="#ffd6e0" stroke="#1e1e1e" stroke-width="4"/><path d="M18 44 L32 18 L46 44" fill="none" stroke="#1e1e1e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="38" r="4" fill="#1e1e1e"/></svg>
+      <svg viewBox="0 0 64 64" aria-label="NexaBuild logo"><rect x="4" y="4" width="56" height="56" rx="7" fill="#1a3c0f" stroke="#14210f" stroke-width="4"/><path d="M18 46 L32 16 L46 46" fill="none" stroke="#f4f1e8" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="40" r="4.5" fill="#f4f1e8"/></svg>
       <div>
         <div class="wordmark">NexaBuild</div>
-        <div style="font-size:12px;font-weight:600;color:#555">Build APK langsung dari browser HP</div>
+        <div class="auth-sub">Build APK langsung dari browser HP</div>
       </div>
     </div>
 
-    <!-- Step 1: token -->
     <div id="authStep1">
+      <span class="step-badge">LANGKAH 1 DARI 3 · TOKEN</span>
       <label class="field-label" for="tokenInput">GitHub Personal Access Token</label>
       <input class="nb-input auth-field" id="tokenInput" type="password" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off" spellcheck="false">
       <div class="field-error" id="tokenErr"></div>
-      <button class="nb-btn primary" id="tokenBtn" style="width:100%;margin-top:6px">
+      <button class="nb-btn primary" id="tokenBtn" style="width:100%;margin-top:8px">
         <i data-lucide="key-round" class="icon"></i> Periksa Token
       </button>
-      <div class="field-hint" style="margin-top:10px">Token butuh scope <b>repo</b> + <b>workflow</b>. Hanya disimpan di HP kamu, hanya dikirim ke api.github.com.</div>
+      <div class="scope-note">Cara buat token: buka <b>github.com → Settings → Developer settings → Personal access tokens → Tokens (classic)</b> → Generate new token → centang scope <b>repo</b> dan <b>workflow</b> → Generate → salin token-nya.</div>
     </div>
 
-    <!-- Step 2: repo -->
     <div id="authStep2" class="hidden">
+      <span class="step-badge">LANGKAH 2 DARI 3 · REPO</span>
       <div class="auth-user">
         <img id="authAvatar" alt="avatar">
         <div>
           <div id="authName" style="font-weight:700"></div>
-          <div id="authLogin" style="font-size:12px;color:#555"></div>
+          <div id="authLogin" style="font-size:12px;color:#4a5a42"></div>
         </div>
         <span class="pill" style="margin-left:auto;background:var(--mint);font-size:11px">Token OK</span>
       </div>
@@ -163,27 +207,27 @@ input,select,textarea{font-family:inherit;font-size:15px}
       <input class="nb-input auth-field" id="repoInput" type="text" placeholder="username/nexabuild-app" autocomplete="off" spellcheck="false">
       <div class="field-error" id="repoErr"></div>
       <div class="field-ok" id="repoOk"></div>
-      <button class="nb-btn primary" id="repoBtn" style="width:100%;margin-top:6px">
+      <button class="nb-btn primary" id="repoBtn" style="width:100%;margin-top:8px">
         <i data-lucide="git-branch" class="icon"></i> Periksa &amp; Sambungkan Repo
       </button>
       <button class="nb-btn small" id="backTokenBtn" style="width:100%;margin-top:10px">← Ganti token</button>
     </div>
 
-    <!-- Step 3: issue + masuk -->
     <div id="authStep3" class="hidden">
+      <span class="step-badge">LANGKAH 3 DARI 3 · CHAT</span>
       <div class="auth-user">
         <img id="authAvatar2" alt="avatar">
         <div>
           <div id="authName2" style="font-weight:700"></div>
-          <div id="authRepo2" style="font-size:12px;color:#555"></div>
+          <div id="authRepo2" style="font-size:12px;color:#4a5a42"></div>
         </div>
         <span class="pill" style="margin-left:auto;background:var(--mint);font-size:11px">Repo OK</span>
       </div>
       <label class="field-label" for="issueInput">Nomor Issue untuk Chat Global</label>
-      <input class="nb-input auth-field" id="issueInput" type="number" min="1" placeholder="contoh: 1 — biarkan kosong jika belum ada">
+      <input class="nb-input auth-field" id="issueInput" type="number" min="1" placeholder="contoh: 1 — kosongkan jika belum ada">
       <div class="field-error" id="issueErr"></div>
-      <div class="field-hint">Buat issue dulu di GitHub: repo kamu → Issues → New issue → judul bebas (misal "Chat") → Submit → catat nomornya.</div>
-      <button class="nb-btn primary" id="enterBtn" style="width:100%;margin-top:10px">
+      <div class="field-hint">Cara buat: buka repo kamu di GitHub → tab <b>Issues</b> → New issue → judul bebas (misal "Chat") → Submit → catat nomornya.</div>
+      <button class="nb-btn primary" id="enterBtn" style="width:100%;margin-top:12px">
         <i data-lucide="arrow-right" class="icon"></i> Masuk Dashboard
       </button>
       <button class="nb-btn small" id="backRepoBtn" style="width:100%;margin-top:10px">← Ganti repo</button>
@@ -197,14 +241,14 @@ input,select,textarea{font-family:inherit;font-size:15px}
     <button class="nb-btn small" id="drawerBtn" aria-label="Buka menu"><i data-lucide="menu" class="icon"></i></button>
     <div class="wordmark">NexaBuild</div>
     <div class="topbar-logo">
-      <svg viewBox="0 0 64 64" aria-label="NexaBuild logo"><rect x="4" y="4" width="56" height="56" rx="10" fill="#c9f2d8" stroke="#1e1e1e" stroke-width="4"/><path d="M18 44 L32 18 L46 44" fill="none" stroke="#1e1e1e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="38" r="4" fill="#1e1e1e"/></svg>
+      <svg viewBox="0 0 64 64" aria-label="NexaBuild logo"><rect x="4" y="4" width="56" height="56" rx="7" fill="#c9f2d8" stroke="#14210f" stroke-width="4"/><path d="M18 46 L32 16 L46 46" fill="none" stroke="#14210f" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="32" cy="40" r="4.5" fill="#14210f"/></svg>
     </div>
   </header>
 
   <div id="drawerOverlay"></div>
   <aside id="drawer" aria-label="Menu samping">
     <div class="drawer-head">
-      <span class="wordmark" style="font-size:18px">NexaBuild</span>
+      <span class="wordmark" style="font-size:22px">NexaBuild</span>
       <button class="nb-btn small" id="drawerClose"><i data-lucide="x" class="icon"></i></button>
     </div>
     <nav class="drawer-nav">
@@ -253,8 +297,9 @@ input,select,textarea{font-family:inherit;font-size:15px}
     <!-- ============ BUILD ============ -->
     <section class="module hidden" id="module-build">
       <h2 class="section-title">Build Project</h2>
-      <div class="nb-card" style="padding:16px;margin-bottom:14px">
-        <div class="field-label">1 · Sumber Project</div>
+
+      <div class="build-step">
+        <div class="build-step-head"><span class="step-num">1</span><span style="font-weight:700">Sumber Project</span></div>
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px">
           <button class="nb-btn small" id="srcZipBtn"><i data-lucide="file-archive" class="icon"></i> Upload ZIP</button>
           <button class="nb-btn small" id="srcUrlBtn"><i data-lucide="link" class="icon"></i> URL Website</button>
@@ -275,8 +320,8 @@ input,select,textarea{font-family:inherit;font-size:15px}
         </div>
       </div>
 
-      <div class="nb-card" style="padding:16px;margin-bottom:14px">
-        <div class="field-label">2 · Identitas Aplikasi (wajib)</div>
+      <div class="build-step">
+        <div class="build-step-head"><span class="step-num">2</span><span style="font-weight:700">Identitas Aplikasi (wajib)</span></div>
         <div style="display:grid;gap:12px">
           <div><label class="field-label" for="appName">Nama aplikasi</label><input class="nb-input" id="appName" maxlength="30"><div class="field-error" id="appNameErr"></div></div>
           <div><label class="field-label" for="shortName">Short name</label><input class="nb-input" id="shortName" maxlength="12"><div class="field-error" id="shortNameErr"></div></div>
@@ -288,7 +333,7 @@ input,select,textarea{font-family:inherit;font-size:15px}
           <div>
             <span class="field-label">Icon aplikasi</span>
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-              <canvas id="iconPreview" width="96" height="96" style="border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);background:#fff"></canvas>
+              <canvas id="iconPreview" width="96" height="96"></canvas>
               <div style="flex:1;min-width:180px">
                 <button class="nb-btn small" id="uploadIconBtn"><i data-lucide="image-plus" class="icon"></i> Upload gambar</button>
                 <input type="file" id="iconInput" accept="image/*" class="hidden">
@@ -298,41 +343,41 @@ input,select,textarea{font-family:inherit;font-size:15px}
           </div>
           <div>
             <span class="field-label">Permission Android</span>
-            <div id="permList" style="display:grid;gap:8px"></div>
+            <div id="permList" class="perm-grid"></div>
           </div>
         </div>
       </div>
 
-      <div class="nb-card" style="padding:16px;margin-bottom:14px">
+      <div class="build-step">
         <button class="nb-btn" id="featToggle" style="width:100%;justify-content:space-between">
           <span style="display:flex;align-items:center;gap:8px"><i data-lucide="sliders-horizontal" class="icon"></i> Fitur Opsional</span>
           <i data-lucide="chevron-down" class="icon" id="featChevron"></i>
         </button>
-        <div id="featBody" class="hidden" style="margin-top:16px;display:grid;gap:14px">
+        <div id="featBody" class="hidden" style="margin-top:16px;display:grid;gap:12px">
           <div><label class="field-label" for="splashText">Teks splash screen</label><input class="nb-input" id="splashText" placeholder="NexaBuild App"></div>
           <div><label class="field-label" for="orientation">Orientasi layar</label>
             <select class="nb-input" id="orientation"><option value="portrait">Portrait (default)</option><option value="landscape">Landscape</option><option value="sensor">Sensor (otomatis)</option></select></div>
           <div><label class="field-label" for="themeColor">Warna tema</label><input class="nb-input" id="themeColor" type="color" value="#ffd6e0" style="height:48px;padding:6px"></div>
-          <div class="nb-card" style="padding:12px;box-shadow:var(--shadow-sm)">
-            <div class="field-label" style="margin-bottom:8px">Opsi WebView</div>
-            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px"><input type="checkbox" id="optZoom" checked> Izinkan zoom</label>
-            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px"><input type="checkbox" id="optPull" checked> Pull-to-refresh</label>
-            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600;margin-bottom:8px"><input type="checkbox" id="optBack" checked> Tombol back menutup app</label>
-            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><input type="checkbox" id="optOffline"> Halaman offline (HTML lokal)</label>
+          <div class="opt-panel">
+            <div class="opt-panel-title">Opsi WebView</div>
+            <label class="check-row"><input type="checkbox" id="optZoom" checked> Izinkan zoom</label>
+            <label class="check-row"><input type="checkbox" id="optPull" checked> Pull-to-refresh</label>
+            <label class="check-row"><input type="checkbox" id="optBack" checked> Tombol back menutup app</label>
+            <label class="check-row" style="margin-bottom:0"><input type="checkbox" id="optOffline"> Halaman offline (HTML lokal)</label>
           </div>
           <div>
             <label class="field-label" for="privacyUrl">Privacy Policy URL</label>
             <input class="nb-input" id="privacyUrl" type="url" placeholder="https://situskamu.com/privacy">
-            <span class="pill" style="background:var(--peach);margin-top:6px;font-size:11px">Wajib sebelum submit Play Store (tidak memblokir build)</span>
+            <span class="pill" style="background:var(--peach);margin-top:8px;font-size:11px">Wajib sebelum submit Play Store (tidak memblokir build)</span>
           </div>
-          <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><input type="checkbox" id="optPush"> Push Notification (FCM)</label>
+          <label class="check-row"><input type="checkbox" id="optPush"> Push Notification (FCM)</label>
           <div id="pushWrap" class="hidden"><label class="field-label" for="gjsonInput">google-services.json</label><input class="nb-input" id="gjsonInput" type="file" accept=".json"><div class="field-hint" id="gjsonHint">File config Firebase project kamu.</div></div>
           <div>
-            <label style="display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600"><input type="checkbox" id="optLogin"> Login Google / Social</label>
-            <div class="field-hint" style="background:var(--lemon);border:var(--border);border-radius:var(--radius);padding:8px 10px;margin-top:6px">Wajib pakai Chrome Custom Tabs — Google memblokir OAuth via WebView sejak 2016.</div>
+            <label class="check-row"><input type="checkbox" id="optLogin"> Login Google / Social</label>
+            <div class="field-hint" style="background:var(--lemon);border:var(--border);border-radius:var(--radius);padding:9px 11px;margin-top:7px">Wajib pakai Chrome Custom Tabs — Google memblokir OAuth via WebView sejak 2016.</div>
           </div>
-          <div class="nb-card" style="padding:12px;box-shadow:var(--shadow-sm)">
-            <div class="field-label" style="margin-bottom:8px">Keystore release</div>
+          <div class="opt-panel">
+            <div class="opt-panel-title">Keystore release</div>
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px">
               <button class="nb-btn small" id="ksGenBtn">Generate otomatis</button>
               <button class="nb-btn small" id="ksUpBtn">Upload manual</button>
@@ -352,14 +397,14 @@ input,select,textarea{font-family:inherit;font-size:15px}
 
       <div id="terminalWrap" class="hidden" style="margin-top:16px">
         <div class="nb-card" style="overflow:hidden">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:var(--border);background:var(--ink);color:var(--bg)">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:var(--border);background:var(--green);color:#f4f1e8">
             <span style="display:flex;align-items:center;gap:8px;font-weight:700;font-size:14px"><i data-lucide="terminal" class="icon"></i> NexaBuild</span>
             <span style="display:flex;align-items:center;gap:10px;font-size:12.5px;font-weight:700">
               <span id="termStatus">Menunggu…</span>
               <span class="pill" style="background:var(--lemon);color:var(--ink)" id="termTimer">00:00</span>
             </span>
           </div>
-          <div id="termBody" style="background:#141414;color:#e8e8e8;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.7;padding:14px;height:280px;overflow-y:auto"></div>
+          <div id="termBody"></div>
         </div>
         <div id="dlWrap" class="hidden" style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
           <a class="nb-btn primary" id="dlApk" target="_blank" rel="noopener"><i data-lucide="download" class="icon"></i> Download APK</a>
@@ -404,9 +449,9 @@ input,select,textarea{font-family:inherit;font-size:15px}
 
 <!-- ================= MODAL ================= -->
 <div id="modalOverlay">
-  <div class="nb-card" style="width:100%;max-width:400px;padding:22px">
-    <div id="modalTitle" style="font-family:var(--font-display);font-size:17px;margin-bottom:10px"></div>
-    <div id="modalBody" style="font-size:14px;line-height:1.6"></div>
+  <div class="nb-card" style="width:100%;max-width:400px;padding:22px;animation:popIn .2s ease">
+    <div id="modalTitle" style="font-family:var(--font-display);font-size:20px;margin-bottom:10px;color:var(--green);letter-spacing:1px"></div>
+    <div id="modalBody" style="font-size:14px;line-height:1.65"></div>
     <div id="modalInputWrap" class="hidden" style="margin-top:12px"><input class="nb-input" id="modalInput"></div>
     <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
       <button class="nb-btn small" id="modalCancel">Batal</button>
@@ -414,10 +459,11 @@ input,select,textarea{font-family:inherit;font-size:15px}
     </div>
   </div>
 </div>
+
 <script>
 "use strict";
 /* ============================================================
-   NexaBuild v2 — client-side dashboard, GitHub as backend
+   NexaBuild v3 — client-side dashboard, GitHub as backend
    ============================================================ */
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
@@ -434,7 +480,7 @@ const refreshIcons=()=>{try{window.lucide&&lucide.createIcons()}catch(e){}};
 
 /* ---------- toast ---------- */
 let toastT=null;
-function toast(msg,ms=3200){
+function toast(msg,ms=3400){
   const t=$("#toast");t.textContent=msg;t.classList.add("show");
   clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),ms);
 }
@@ -446,34 +492,35 @@ function nbModal({title,body,input=false,value="",okText="OK",danger=false}){
     $("#modalTitle").textContent=title;
     $("#modalBody").innerHTML=body;
     $("#modalInputWrap").classList.toggle("hidden",!input);
-    if(input){$("#modalInput").value=value;}
+    if(input)$("#modalInput").value=value;
     const ok=$("#modalOk");ok.textContent=okText;ok.className="nb-btn small "+(danger?"danger":"primary");
     ov.style.display="flex";
     const done=v=>{ov.style.display="none";ok.onclick=ca.onclick=ov.onclick=null;res(v);};
     ok.onclick=()=>done(input?$("#modalInput").value.trim():true);
     const ca=$("#modalCancel");ca.onclick=()=>done(null);
     ov.onclick=e=>{if(e.target===ov)done(null);};
-    if(input)setTimeout(()=>$("#modalInput").focus(),50);
+    if(input)setTimeout(()=>$("#modalInput").focus(),60);
   });
 }
 
-/* ---------- field error helpers ---------- */
-function fErr(sel,msg){const e=$(sel);if(!e)return;if(msg){e.textContent=msg;e.classList.add("show");}else{e.classList.remove("show");}}
-function fOk(sel,msg){const e=$(sel);if(!e)return;if(msg){e.textContent=msg;e.classList.add("show");}else{e.classList.remove("show");}}
+/* ---------- field helpers ---------- */
+function fErr(sel,msg){const e=$(sel);if(!e)return;if(msg){e.textContent=msg;e.classList.add("show");}else e.classList.remove("show");}
+function fOk(sel,msg){const e=$(sel);if(!e)return;if(msg){e.textContent=msg;e.classList.add("show");}else e.classList.remove("show");}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 
 /* ---------- offline ---------- */
-const updateOnline=()=>{$("#offlineBanner").style.display=navigator.onLine?"none":"block";};
+const updateOnline=()=>{$("#offlineBanner").classList.toggle("hidden",navigator.onLine);};
 window.addEventListener("online",()=>{updateOnline();toast("Koneksi kembali online.");});
 window.addEventListener("offline",()=>{updateOnline();toast("Koneksi terputus. Cek internet kamu.");});
 updateOnline();
 
 /* ---------- GitHub API layer ---------- */
 function friendlyError(e,context){
-  const m=e.message||String(e);
-  if(/Failed to fetch|NetworkError|Load failed/i.test(m))return "Jaringan bermasalah atau koneksi terputus. Cek internet kamu, lalu coba lagi.";
-  if(/403/.test(m)&&/rate limit|kuota/i.test(m))return "Kuota GitHub API habis sementara. Tunggu ±1 jam, atau buat token baru.";
-  if(/401|Bad credentials/i.test(m))return "Token ditolak GitHub. Pastikan token benar, belum kedaluwarsa, dan scope repo+workflow aktif.";
-  if(/404|Not Found/i.test(m))return context==="repo"?"Repo tidak ditemukan. Cek penulisan owner/nama-repo (huruf besar/kecil sama saja, tapi harus persis).":"Data tidak ditemukan di repo.";
+  const m=(e&&e.message)||String(e);
+  if(/Failed to fetch|NetworkError|Load failed/i.test(m))return "Jaringan bermasalah atau koneksi terputus. Cek internet kamu lalu coba lagi.";
+  if(/401|Bad credentials/i.test(m))return "Token ditolak GitHub (401). Penyebab paling umum: (1) token salah ketik/salah salin, (2) token sudah kedaluwarsa atau di-revoke, (3) scope repo & workflow belum dicentang saat membuat token. Buat token BARU di github.com → Settings → Developer settings → Personal access tokens → Tokens (classic) → centang repo + workflow.";
+  if(/403/.test(m)&&/rate|kuota/i.test(m))return "Kuota GitHub API habis sementara. Tunggu ±1 jam lalu coba lagi.";
+  if(/404|Not Found/i.test(m))return context==="repo"?"Repo tidak ditemukan. Pastikan penulisan persis: username/nama-repo (contoh: nexa-ofc/nexa-app). Cek juga repo-nya benar-benar ada dan kamu login dengan akun yang punya akses.":"Data tidak ditemukan di repo.";
   if(/422/.test(m))return "Data yang dikirim tidak valid. Periksa kembali isian.";
   return m;
 }
@@ -493,7 +540,7 @@ async function gh(path,{method="GET",body=null,raw=false,retries=3,context=""}={
       if(!res.ok){
         if(res.status===403&&rl==="0"){
           const wait=Math.max(1,Math.ceil((state.rateLimit.reset-Date.now())/60000));
-          throw new Error("Kuota GitHub API habis. Coba lagi ±"+wait+" menit (reset otomatis).");
+          throw new Error("Kuota GitHub API habis. Coba lagi ±"+wait+" menit.");
         }
         if(res.status===401)throw new Error("401 Bad credentials");
         if(res.status===404)throw new Error("404 Not Found");
@@ -501,22 +548,16 @@ async function gh(path,{method="GET",body=null,raw=false,retries=3,context=""}={
         throw new Error((data&&data.message)||("HTTP "+res.status));
       }
       return data;
-    }catch(e){
-      lastErr=e;
-      if(i<retries-1)await new Promise(r=>setTimeout(r,700*(i+1)));
-    }
+    }catch(e){lastErr=e;if(i<retries-1)await new Promise(r=>setTimeout(r,700*(i+1)));}
   }
   throw new Error(friendlyError(lastErr,context));
 }
 function rateWatch(){
   const r=state.rateLimit.remaining;
   if(r!==null&&r<60&&r>0){
-    const el=$("#rlPill");
-    if(el)el.textContent="Kuota GitHub API tersisa "+r;
-    else{
-      const p=document.createElement("span");p.id="rlPill";p.className="pill";p.style.background="var(--red)";
-      p.textContent="Kuota GitHub API tersisa "+r;$("#ticker")&&$("#ticker").prepend(p);
-    }
+    let p=$("#rlPill");
+    if(!p&&$("#ticker")){p=document.createElement("span");p.id="rlPill";p.className="pill";p.style.background="var(--red)";$("#ticker").prepend(p);}
+    if(p)p.textContent="Kuota GitHub API tersisa "+r;
   }
 }
 function renderState(container,kind,{onRetry,msg}={}){
@@ -528,10 +569,10 @@ function renderState(container,kind,{onRetry,msg}={}){
   const rb=c.querySelector("[data-retry]");if(rb&&onRetry)rb.onclick=onRetry;
 }
 
-/* ---------- AUTH: 3 langkah, error jelas per langkah ---------- */
-function setBtnLoading(btn,on,html){
-  if(on){btn.dataset.orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spinner inline"></span> '+(html||"Memproses…");}
-  else{btn.disabled=false;btn.innerHTML=btn.dataset.orig||html;}
+/* ---------- AUTH ---------- */
+function setBtnLoading(btn,on,label){
+  if(on){btn.dataset.orig=btn.innerHTML;btn.disabled=true;btn.innerHTML='<span class="spinner inline"></span> '+(label||"Memproses…");}
+  else{btn.disabled=false;if(btn.dataset.orig)btn.innerHTML=btn.dataset.orig;}
 }
 function showAuthStep(n){
   ["#authStep1","#authStep2","#authStep3"].forEach((s,i)=>$(s).classList.toggle("hidden",i!==n-1));
@@ -542,7 +583,7 @@ async function checkToken(){
   const token=$("#tokenInput").value.trim();
   if(!token){fErr("#tokenErr","Token masih kosong. Paste token GitHub kamu di sini.");return;}
   if(!/^(gh[ps]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})$/.test(token)){
-    fErr("#tokenErr","Format token salah. Token klasik diawali ghp_ (contoh: ghp_aB3...). Token fine-grained diawali github_pat_. Salin ulang dari halaman GitHub → Settings → Developer settings → Tokens.");
+    fErr("#tokenErr","Format token salah. Token classic diawali ghp_ (contoh: ghp_aB3xYz...). Token fine-grained diawali github_pat_. Salin ulang dari halaman GitHub.");
     return;
   }
   const btn=$("#tokenBtn");setBtnLoading(btn,true,"Memeriksa token…");
@@ -554,41 +595,39 @@ async function checkToken(){
     $("#authAvatar2").src=state.user.avatar;$("#authName2").textContent=state.user.name;$("#authRepo2").textContent="—";
     toast("Token valid. Halo, "+state.user.name+"!");
     showAuthStep(2);
-    setTimeout(()=>$("#repoInput").focus(),100);
+    setTimeout(()=>$("#repoInput").focus(),120);
   }catch(e){
-    fErr("#tokenErr",friendlyError(e,"token")+" — Jika yakin token benar, cek juga: scope repo & workflow sudah dicentang saat membuat token.");
+    fErr("#tokenErr",friendlyError(e,"token"));
   }
   setBtnLoading(btn,false);
 }
 async function checkRepo(){
   fErr("#repoErr");fOk("#repoOk");
   const repo=$("#repoInput").value.trim().replace(/^https?:\/\/github\.com\//i,"").replace(/\/+$/,"");
-  if(!repo){fErr("#repoErr","Nama repo masih kosong. Format: owner/nama-repo, contoh: budi123/aplikasiku.");return;}
+  if(!repo){fErr("#repoErr","Nama repo masih kosong. Format: owner/nama-repo, contoh: nexa-ofc/nexa-app.");return;}
   if(!/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})\/[A-Za-z0-9_.-]+$/.test(repo)){
-    fErr("#repoErr","Format salah. Harus ada tanda pisah: username/nama-repo. Contoh benar: budi123/aplikasiku. Contoh salah: budi123 (tanpa nama repo).");
+    fErr("#repoErr","Format salah. Harus ada tanda pisah: username/nama-repo. Contoh benar: nexa-ofc/nexa-app. Contoh salah: nexa-ofc (tanpa nama repo).");
     return;
   }
   const btn=$("#repoBtn");setBtnLoading(btn,true,"Memeriksa repo…");
   try{
     const r=await gh("/repos/"+repo,{context:"repo"});
-    if(r.private)throw new Error("Repo ini PRIVATE. GitHub Actions gratis hanya unlimited untuk repo PUBLIK. Ubah repo ke Public: repo → Settings → Danger Zone → Change visibility → Make public.");
+    if(r.private)throw new Error("Repo ini PRIVATE. GitHub Actions gratis unlimited hanya untuk repo PUBLIK. Ubah: repo → Settings → Danger Zone → Change repository visibility → Make public.");
     const canPush=r.permissions&&(r.permissions.push||r.permissions.admin);
     if(!canPush)throw new Error("Token valid tapi TIDAK punya akses tulis ke repo "+repo+". Kamu harus pemilik repo atau kolaborator dengan akses write.");
     state.repo=repo;LS.set("repo",repo);
     $("#authRepo2").textContent=repo;
-    fOk("#repoOk","Repo OK: "+repo+(r.description?" — "+r.description:""));
+    fOk("#repoOk","Repo OK: "+repo);
     toast("Repo tersambung: "+repo);
     showAuthStep(3);
-  }catch(e){
-    fErr("#repoErr",friendlyError(e,"repo"));
-  }
+  }catch(e){fErr("#repoErr",friendlyError(e,"repo"));}
   setBtnLoading(btn,false);
 }
 function enterDashboard(){
-  const iss=$("#issueInput").value.trim();
   fErr("#issueErr");
+  const iss=$("#issueInput").value.trim();
   if(iss){
-    if(!/^\d+$/.test(iss)||+iss<1){fErr("#issueErr","Nomor issue harus angka bulat positif, contoh: 1. Kosongkan saja kalau belum punya issue chat.");return;}
+    if(!/^\d+$/.test(iss)||+iss<1){fErr("#issueErr","Nomor issue harus angka bulat positif, contoh: 1. Kosongkan saja kalau belum punya.");return;}
     state.issue=+iss;LS.set("issue",state.issue);
   }
   LS.set("profile",state.profile);
@@ -598,7 +637,7 @@ function enterDashboard(){
   $("#homeName").textContent=state.user.name;
   $("#homeRole").textContent=state.profile.role||"Developer";
   refreshIcons();initHome();loadBuilds();startChatIfReady();
-  toast("Selamat datang di NexaBuild, "+state.user.name+"!");
+  toast("Selamat datang, "+state.user.name+"!");
 }
 function logout(){
   nbModal({title:"Putuskan koneksi?",body:"Token, nama repo, dan data lokal akan dihapus dari browser ini. Kamu bisa sambungkan lagi kapan pun.",okText:"Putuskan",danger:true}).then(v=>{
@@ -646,10 +685,9 @@ $$(".drawer-item").forEach(b=>b.onclick=async()=>{
     return;
   }
   if(k==="about"){
-    nbModal({title:"Tentang NexaBuild",body:"NexaBuild v2.0 — dashboard build APK/AAB 100% client-side. Repo kamu = database, storage &amp; compute engine via GitHub Actions. Tanpa server, tanpa biaya.",okText:"Tutup"});
+    nbModal({title:"Tentang NexaBuild",body:"NexaBuild v3.0 — dashboard build APK/AAB 100% client-side. Repo kamu = database, storage &amp; compute engine via GitHub Actions. Tanpa server, tanpa biaya.",okText:"Tutup"});
   }
 });
-function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 
 /* ---------- navigation ---------- */
 $$(".nav-item").forEach(b=>b.onclick=()=>{
@@ -661,12 +699,11 @@ $$(".nav-item").forEach(b=>b.onclick=()=>{
   if(b.dataset.nav==="build")nextVersionCode();
   window.scrollTo(0,0);
 });
-</script>
-<script>
-"use strict";
+function showModule(m){["home","quran","build","edit","chat"].forEach(x=>$("#module-"+x).classList.add("hidden"));$("#module-"+m).classList.remove("hidden");$$(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.nav===m));window.scrollTo(0,0);}
+
 /* ================= HOME ================= */
 function initHome(){
-  const items=[["GitHub: "+state.repo,"var(--sky)"],["v2.0 · NexaBuild","var(--lemon)"],["Tips: isi Privacy Policy sebelum Play Store","var(--peach)"],["Build via GitHub Actions","var(--mint)"],["Token tersimpan lokal di HP","var(--lav)"]];
+  const items=[["GitHub: "+state.repo,"var(--sky)"],["v3.0 · NexaBuild","var(--lemon)"],["Tips: isi Privacy Policy sebelum Play Store","var(--peach)"],["Build via GitHub Actions","var(--green-soft)"],["Token tersimpan lokal di HP","var(--lav)"]];
   const half=items.map(([t,c])=>'<span class="pill" style="background:'+c+'">'+esc(t)+'</span>').join("");
   $("#ticker").innerHTML=half+half;
   gh("/repos/"+state.repo).then(()=>{$("#connDot").className="dot on";$("#connText").textContent="Terhubung";})
@@ -689,7 +726,7 @@ function initWeather(){
 function initBattery(){
   if(!navigator.getBattery){$("#batteryText").textContent="Tidak tersedia di browser ini";return;}
   navigator.getBattery().then(b=>{
-    const upd=()=>{const p=Math.round(b.level*100);$("#batteryText").textContent=p+"%"+(b.charging?" ⚡":"");$("#batteryBar").style.width=p+"%";$("#batteryBar").style.background=p<20?"var(--red)":"var(--mint)";};
+    const upd=()=>{const p=Math.round(b.level*100);$("#batteryText").textContent=p+"%"+(b.charging?" ⚡":"");$("#batteryBar").style.width=p+"%";$("#batteryBar").style.background=p<20?"var(--err)":"var(--green-mid)";};
     upd();b.addEventListener("levelchange",upd);b.addEventListener("chargingchange",upd);
   }).catch(()=>{$("#batteryText").textContent="Tidak tersedia di browser ini";});
 }
@@ -713,7 +750,6 @@ function startClock(){const f=()=>{$("#clockBox").textContent=new Date().toLocal
 /* ---------- Al-Qur'an ---------- */
 $("#quranBox").onclick=()=>{showModule("quran");renderQuranHome();};
 $("#quranBack").onclick=()=>showModule("home");
-function showModule(m){["home","quran","build","edit","chat"].forEach(x=>$("#module-"+x).classList.add("hidden"));$("#module-"+m).classList.remove("hidden");$$(".nav-item").forEach(n=>n.classList.toggle("active",n.dataset.nav===m));window.scrollTo(0,0);}
 async function renderQuranHome(){
   renderState("#quranContent","loading");
   try{
@@ -735,7 +771,7 @@ async function renderSurah(n){
     if(d.code!==200)throw new Error("API error");
     const s=d.data;
     let h='<div class="nb-card" style="padding:14px;margin-bottom:14px"><button class="nb-btn small" id="backSurah"><i data-lucide="arrow-left" class="icon"></i> Daftar Surah</button>'+
-      '<h3 style="font-family:var(--font-display);margin:12px 0 4px">'+esc(s.englishName)+' · '+esc(s.name)+'</h3><div style="font-size:13px;color:#555">'+esc(s.englishNameTranslation)+' · '+s.numberOfAyahs+' ayat · '+esc(s.revelationType)+'</div></div>';
+      '<h3 style="font-family:var(--font-display);margin:12px 0 4px;font-size:22px;letter-spacing:1px;color:var(--green)">'+esc(s.englishName)+' · '+esc(s.name)+'</h3><div style="font-size:13px;color:#4a5a42">'+esc(s.englishNameTranslation)+' · '+s.numberOfAyahs+' ayat · '+esc(s.revelationType)+'</div></div>';
     s.ayahs.forEach(a=>{
       h+='<div class="ayah"><span class="ayah-num">'+a.numberInSurah+'</span><div class="ayah-arab" dir="rtl">'+esc(a.text)+'</div><div class="ayah-id">'+esc(a.edition?.text||"")+'</div></div>';
     });
@@ -778,15 +814,15 @@ $("#zipInput").onchange=async e=>{
     if(!type){
       state.build.projectType=null;
       $("#detectedType").textContent="Tidak cocok kategori manapun";$("#detectedType").style.background="var(--red)";
-      fErr("#typeErr","Isi ZIP tidak dikenali. Yang diterima: index.html (web statis), capacitor.config.*, config.xml, pubspec.yaml, atau app.json + metro.config.js. Build tidak dipaksa — perbaiki isi ZIP atau koreksi manual.");
+      fErr("#typeErr","Isi ZIP tidak dikenali. Yang diterima: index.html (web statis), capacitor.config.*, config.xml, pubspec.yaml, atau app.json + metro.config.js. Build tidak dipaksa.");
       $("#correctTypeBtn").classList.remove("hidden");
     }else{
       state.build.projectType=type;
-      $("#detectedType").textContent=PROJECT_TYPES[type].label;$("#detectedType").style.background="var(--mint)";
+      $("#detectedType").textContent=PROJECT_TYPES[type].label;$("#detectedType").style.background="var(--green-soft)";
       $("#correctTypeBtn").classList.remove("hidden");renderPerms(type);drawDefaultIcon();
     }
     validateBuildForm();
-  }catch(err){fErr("#typeErr","ZIP tidak bisa dibaca ("+err.message+"). Pastikan file ZIP valid dan tidak rusak.");}
+  }catch(err){fErr("#typeErr","ZIP tidak bisa dibaca. Pastikan file ZIP valid.");}
 };
 function blobToBase64(b){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=()=>rej(new Error("gagal membaca file"));r.readAsDataURL(b);});}
 $("#urlInput").oninput=()=>{
@@ -798,7 +834,7 @@ $("#urlInput").oninput=()=>{
     if(!/^https?:$/.test(u.protocol))throw 0;
     state.build.url=v;state.build.sourceType="url";state.build.projectType="webview";state.build.zipBase64=null;
     $("#zipInfo").classList.add("hidden");
-    $("#detectedType").textContent="Capacitor WebView";$("#detectedType").style.background="var(--mint)";
+    $("#detectedType").textContent="Capacitor WebView";$("#detectedType").style.background="var(--green-soft)";
     $("#correctTypeBtn").classList.remove("hidden");renderPerms("webview");drawDefaultIcon();
   }catch{fErr("#urlErr","URL tidak valid. Harus diawali http:// atau https:// — contoh: https://situsku.com");state.build.url="";}
   validateBuildForm();
@@ -809,21 +845,20 @@ $("#correctTypeBtn").onclick=async()=>{
   const t=r.trim().toLowerCase();
   if(PROJECT_TYPES[t]){
     state.build.projectType=t;
-    $("#detectedType").textContent=PROJECT_TYPES[t].label;$("#detectedType").style.background="var(--mint)";
+    $("#detectedType").textContent=PROJECT_TYPES[t].label;$("#detectedType").style.background="var(--green-soft)";
     fErr("#typeErr");renderPerms(t);validateBuildForm();
-  }else fErr("#typeErr","Tipe \""+esc(r)+"\" tidak dikenal. Pilihan valid: capacitor, cordova, flutter, reactnative, webview.");
+  }else fErr("#typeErr","Tipe \""+esc(r)+"\" tidak dikenal. Pilihan: capacitor, cordova, flutter, reactnative, webview.");
 };
 function renderPerms(type){
   const suggested=PROJECT_TYPES[type]?.perms||["INTERNET"];
-  $("#permList").innerHTML=ALL_PERMS.map(p=>'<label style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600"><input type="checkbox" class="perm-cb" value="'+p+'" '+(suggested.includes(p)?"checked":"")+'> '+p+'</label>').join("");
+  $("#permList").innerHTML=ALL_PERMS.map(p=>'<label><input type="checkbox" class="perm-cb" value="'+p+'" '+(suggested.includes(p)?"checked":"")+'> <span>'+p+'</span></label>').join("");
 }
 const getPerms=()=>$$(".perm-cb").filter(c=>c.checked).map(c=>c.value);
 
-/* icon */
 function drawDefaultIcon(){
   const c=$("#iconPreview"),x=c.getContext("2d");
   x.fillStyle=$("#themeColor").value||"#ffd6e0";x.fillRect(0,0,96,96);
-  x.fillStyle="#1e1e1e";x.font="bold 40px 'Archivo Black',sans-serif";x.textAlign="center";x.textBaseline="middle";
+  x.fillStyle="#14210f";x.font="bold 42px 'Creepster',cursive";x.textAlign="center";x.textBaseline="middle";
   x.fillText(($("#appName").value.trim()[0]||"N").toUpperCase(),48,52);
   state.build.iconDataUrl=null;state.build.iconGenerated=true;
   $("#iconHint").textContent="Icon default dari inisial nama. Upload gambar untuk pakai icon sendiri.";
@@ -843,14 +878,13 @@ $("#iconInput").onchange=e=>{
     state.build.iconDataUrl=oc.toDataURL("image/png");state.build.iconGenerated=true;
     const c=$("#iconPreview"),x=c.getContext("2d");
     x.clearRect(0,0,96,96);x.drawImage(oc,0,0,96,96);
-    $("#iconHint").textContent="Icon OK — semua ukuran Android (mdpi–xxxhdpi, adaptive, maskable) digenerate saat build.";
+    $("#iconHint").textContent="Icon OK — semua ukuran Android digenerate saat build.";
   };
   img.onerror=()=>{$("#iconHint").textContent="Gambar tidak bisa dibaca. Coba file lain.";};
   img.src=URL.createObjectURL(f);
 };
 $("#themeColor").oninput=()=>{if(!state.build.iconDataUrl)drawDefaultIcon();};
 
-/* keystore */
 $("#ksGenBtn").onclick=async()=>{
   const r=await nbModal({title:"Generate Keystore",body:"Workflow akan generate keystore release baru. Setelah build pertama selesai, download backup-nya dan simpan baik-baik.",okText:"Generate"});
   if(!r)return;
@@ -876,7 +910,6 @@ $("#ksDlBtn").onclick=()=>{
   a.download=state.build.keystore.name||"nexabuild.keystore";a.click();
 };
 
-/* fitur opsional */
 $("#featToggle").onclick=()=>{
   $("#featBody").classList.toggle("hidden");
   $("#featChevron").style.transform=$("#featBody").classList.contains("hidden")?"":"rotate(180deg)";
@@ -888,11 +921,10 @@ $("#gjsonInput").onchange=async e=>{
   try{
     const t=JSON.parse(await f.text());
     if(!t.project_info)throw 0;
-    state.build.gjson=t;$("#gjsonHint").textContent="google-services.json valid ✓";
+    state.build.gjson=t;$("#gjsonHint").textContent="google-services.json valid.";
   }catch{state.build.gjson=null;$("#gjsonHint").textContent="File bukan google-services.json yang valid.";}
 };
 
-/* validasi */
 function validatePackageId(v){return /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(v)&&v.length<=100;}
 ["#appName","#shortName","#packageId","#versionName","#versionCode"].forEach(s=>$(s).addEventListener("input",validateBuildForm));
 function validateBuildForm(){
@@ -919,7 +951,6 @@ async function nextVersionCode(){
   }
 }
 
-/* trigger build */
 $("#buildBtn").onclick=()=>startBuild(false,null);
 async function startBuild(isRebuild,existingConfig){
   if(state.build.running)return;
@@ -938,7 +969,7 @@ async function startBuild(isRebuild,existingConfig){
     await new Promise(r=>setTimeout(r,5000));
     const runs=await gh("/repos/"+state.repo+"/actions/runs?per_page=5");
     const run=runs.workflow_runs.find(w=>/nexabuild/i.test(w.name||""))||runs.workflow_runs[0];
-    if(!run)throw new Error("Run workflow tidak ditemukan dalam 5 detik. Cek tab Actions di repo GitHub kamu — kemungkinan workflow sedang antre.");
+    if(!run)throw new Error("Run workflow tidak ditemukan dalam 5 detik. Cek tab Actions di repo GitHub kamu.");
     state.build.runId=run.id;
     termLog("info","Run ID: "+run.id+" — memantau progres…");
     pollRun(run.id,cfg);
@@ -946,7 +977,7 @@ async function startBuild(isRebuild,existingConfig){
     termLog("error",friendlyError(e,"build"));
     state.build.running=false;btn.disabled=false;
     btn.innerHTML='<i data-lucide="hammer" class="icon"></i> Build APK';refreshIcons();
-    toast("Build gagal dimulai: "+friendlyError(e,"build"));
+    toast("Build gagal dimulai.");
   }
 }
 function collectConfig(){
@@ -962,7 +993,7 @@ function collectConfig(){
     webview:{zoom:$("#optZoom").checked,pullToRefresh:$("#optPull").checked,backToClose:$("#optBack").checked,offlinePage:$("#optOffline").checked},
     privacyUrl:$("#privacyUrl").value.trim(),
     push:{enabled:$("#optPush").checked,gjson:state.build.gjson},
-    login:{enabled:$("#optLogin").checked,note:"Chrome Custom Tabs wajib — Google blokir OAuth via WebView sejak 2016"},
+    login:{enabled:$("#optLogin").checked,note:"Chrome Custom Tabs wajib"},
     keystore:state.build.keystore?{mode:state.build.keystore.mode,data:state.build.keystore.mode==="upload"?state.build.keystore.data:undefined,name:state.build.keystore.name}:null,
     whitelist:$("#whitelist").value.split("\n").map(s=>s.trim()).filter(Boolean)
   };
@@ -973,8 +1004,8 @@ async function upsertFile(path,content,message){
   await gh("/repos/"+state.repo+"/contents/"+path,{method:"PUT",body:{message,content:btoa(unescape(encodeURIComponent(content))),sha,branch:"main"}});
 }
 function termLog(level,msg){
-  const colors={info:"#8ecbff",success:"#7ee2a8",warning:"#ffd166",error:"#ff9d9d"};
-  const d=document.createElement("div");d.style.color=colors[level]||"#e8e8e8";
+  const colors={info:"#9ecfff",success:"#8ee2a8",warning:"#ffd166",error:"#ff9d9d"};
+  const d=document.createElement("div");d.style.color=colors[level]||"#d8e8cf";
   d.textContent="["+new Date().toLocaleTimeString()+"] "+msg;
   const b=$("#termBody");b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
@@ -994,12 +1025,12 @@ async function pollRun(runId,cfg){
       if(jobs&&jobs.jobs[0]){
         const job=jobs.jobs[0];
         const step=job.steps.find(s=>s.status==="in_progress");
-        $("#termStatus").textContent=job.status==="completed"?(job.conclusion==="success"?"Sukses ✓":"Gagal ✗"):(step?step.name:"Berjalan…");
+        $("#termStatus").textContent=job.status==="completed"?(job.conclusion==="success"?"Sukses":"Gagal"):(step?step.name:"Berjalan…");
         if(job.status==="completed"&&job.conclusion!=="success"){
           const logs=await gh("/repos/"+state.repo+"/actions/jobs/"+job.id+"/logs",{raw:true}).catch(()=>"");
           const tail=logs.slice(-3000);
           if(tail.length>lastLogLen){tail.slice(lastLogLen).split("\n").filter(Boolean).slice(-12).forEach(l=>{
-            const lv=/error|failed|✗|FAIL/i.test(l)?"error":/warning|WARN/i.test(l)?"warning":/success|✓|BUILD SUCCESSFUL/i.test(l)?"success":"info";
+            const lv=/error|failed|FAIL/i.test(l)?"error":/warning|WARN/i.test(l)?"warning":/success|BUILD SUCCESSFUL/i.test(l)?"success":"info";
             termLog(lv,l.slice(0,180));
           });lastLogLen=tail.length;}
         }
@@ -1026,8 +1057,8 @@ async function finishBuild(run,cfg){
       if(apk)$("#dlApk").href=apk.browser_download_url;
       if(aab)$("#dlAab").href=aab.browser_download_url;
       if(apk||aab){$("#dlWrap").classList.remove("hidden");toast("Build sukses! APK & AAB siap diunduh.");}
-      else toast("Build sukses, tapi tidak menemukan file APK/AAB di release.");
-    }catch{toast("Build sukses, tapi gagal membaca release. Cek langsung di repo → Releases.");}
+      else toast("Build sukses, tapi file APK/AAB tidak ditemukan di release.");
+    }catch{toast("Build sukses. Cek repo → Releases untuk unduhan.");}
   }else{
     termLog("error","Build gagal. Detail lengkap di tab Actions repo kamu.");
     $("#buildFail").classList.remove("hidden");
@@ -1043,9 +1074,7 @@ async function saveBuildRecord(cfg){
   await gh("/repos/"+state.repo+"/contents/builds.json",{method:"PUT",body:{message:"NexaBuild: update builds.json",content:btoa(unescape(encodeURIComponent(JSON.stringify({builds},null,2)))),sha,branch:"main"}});
   state.builds=builds;
 }
-</script>
-<script>
-"use strict";
+
 /* ================= EDIT ================= */
 async function loadBuilds(){
   try{
@@ -1059,10 +1088,10 @@ function renderEditList(){
   c.innerHTML="";
   state.builds.forEach(b=>{
     const el=document.createElement("div");
-    el.className="nb-card";el.style.cssText="display:flex;gap:12px;align-items:center;padding:12px;margin-bottom:12px";
-    const img=b.iconDataUrl?('<img src="'+b.iconDataUrl+'" style="width:52px;height:52px;border:var(--border);border-radius:10px;object-fit:cover">'):('<div style="width:52px;height:52px;border:var(--border);border-radius:10px;background:var(--lav);display:flex;align-items:center;justify-content:center;font-family:var(--font-display)">'+esc(b.appName[0]||"?")+'</div>');
-    el.innerHTML=img+'<div style="flex:1;min-width:0"><div style="font-weight:700">'+esc(b.appName)+' <span style="font-size:12px;color:#555">v'+esc(b.versionName)+' ('+b.versionCode+')</span></div>'+
-      '<div style="font-size:12px;color:#555">'+esc(PROJECT_TYPES[b.projectType]?.label||b.projectType)+' · <span style="color:'+(b.status==="success"?"#1a7f4b":"var(--err)")+';font-weight:700">'+esc(b.status)+'</span></div></div>'+
+    el.className="nb-card";el.style.cssText="display:flex;gap:12px;align-items:center;padding:13px;margin-bottom:12px";
+    const img=b.iconDataUrl?('<img src="'+b.iconDataUrl+'" style="width:52px;height:52px;border:var(--border);border-radius:8px;object-fit:cover">'):('<div style="width:52px;height:52px;border:var(--border);border-radius:8px;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:22px;color:var(--green)">'+esc((b.appName||"?")[0])+'</div>');
+    el.innerHTML=img+'<div style="flex:1;min-width:0"><div style="font-weight:700">'+esc(b.appName)+' <span style="font-size:12px;color:#4a5a42">v'+esc(b.versionName)+' ('+b.versionCode+')</span></div>'+
+      '<div style="font-size:12px;color:#4a5a42">'+esc(PROJECT_TYPES[b.projectType]?.label||b.projectType)+' · <span style="color:'+(b.status==="success"?"var(--ok)":"var(--err)")+';font-weight:700">'+esc(b.status)+'</span></div></div>'+
       '<button class="nb-btn small">Edit &amp; Build Ulang</button>';
     el.querySelector("button").onclick=()=>loadToForm(b);
     c.appendChild(el);
@@ -1078,7 +1107,7 @@ function loadToForm(b){
   state.build.url=cfg.url||"";
   if(cfg.url){$("#urlInput").value=cfg.url;$("#urlInputWrap").classList.remove("hidden");}
   if(cfg.zipBase64){state.build.zipBase64=cfg.zipBase64;state.build.zipName=cfg.zipName;$("#zipInfo").classList.remove("hidden");$("#zipInfo").textContent="ZIP (dari riwayat): "+cfg.zipName;}
-  $("#detectedType").textContent=PROJECT_TYPES[cfg.projectType]?.label||cfg.projectType;$("#detectedType").style.background="var(--mint)";$("#correctTypeBtn").classList.remove("hidden");
+  $("#detectedType").textContent=PROJECT_TYPES[cfg.projectType]?.label||cfg.projectType;$("#detectedType").style.background="var(--green-soft)";$("#correctTypeBtn").classList.remove("hidden");
   renderPerms(cfg.projectType||"webview");
   (cfg.permissions||[]).forEach(p=>{const cb=$$(".perm-cb").find(c=>c.value===p);if(cb)cb.checked=true;});
   $("#splashText").value=cfg.splashText||"";$("#orientation").value=cfg.orientation||"portrait";$("#themeColor").value=cfg.themeColor||"#ffd6e0";
@@ -1126,8 +1155,8 @@ async function loadChat(first){
       const row=document.createElement("div");
       row.style.cssText="display:flex;gap:8px;"+(mine?"flex-direction:row-reverse;":"");
       row.innerHTML='<img src="'+esc(c.user.avatar_url)+'" style="width:32px;height:32px;border:var(--border);border-radius:8px;flex:none">'+
-        '<div style="max-width:75%"><div style="font-size:11px;font-weight:700;color:#666;margin-bottom:3px;'+(mine?"text-align:right;":"")+'">'+esc(c.user.login)+" · "+relTime(c.created_at)+'</div>'+
-        '<div style="border:var(--border);border-radius:12px;padding:9px 13px;font-size:14px;box-shadow:var(--shadow-sm);background:'+(mine?"var(--mint)":"var(--surface)")+';'+(mine?"border-bottom-right-radius:3px;":"border-bottom-left-radius:3px;")+'">'+esc(c.body)+'</div></div>';
+        '<div style="max-width:75%"><div style="font-size:11px;font-weight:700;color:#4a5a42;margin-bottom:3px;'+(mine?"text-align:right;":"")+'">'+esc(c.user.login)+" · "+relTime(c.created_at)+'</div>'+
+        '<div class="chat-bubble" style="background:'+(mine?"var(--green-soft)":"var(--surface)")+';'+(mine?"border-bottom-right-radius:4px;":"border-bottom-left-radius:4px;")+'">'+esc(c.body)+'</div></div>';
       box.appendChild(row);
     });
     if(fresh.length)box.scrollTop=box.scrollHeight;
