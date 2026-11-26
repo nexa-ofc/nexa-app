@@ -42,15 +42,14 @@ jobs:
           if cfg.get("iconDataUrl"):
               open("icon.png","wb").write(base64.b64decode(cfg["iconDataUrl"].split(",",1)[1]))
           else:
-              # icon default: inisial di atas warna tema
               from PIL import Image,ImageDraw,ImageFont
-              img=Image.new("RGB",(512,512),cfg.get("themeColor","#ffd6e0"))
+              img=Image.new("RGB",(512,512),cfg.get("themeColor","#76FF03"))
               d=ImageDraw.Draw(img)
               try: font=ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",220)
               except: font=ImageFont.load_default()
               ch=(cfg.get("appName") or "N")[0].upper()
               bb=d.textbbox((0,0),ch,font=font)
-              d.text(((512-(bb[2]-bb[0]))/2-bb[0],(512-(bb[3]-bb[1]))/2-bb[1]),ch,fill="#1e1e1e",font=font)
+              d.text(((512-(bb[2]-bb[0]))/2-bb[0],(512-(bb[3]-bb[1]))/2-bb[1]),ch,fill="#0A1800",font=font)
               img.save("icon.png")
           PY
 
@@ -79,13 +78,18 @@ jobs:
       - name: Generate Android project (Capacitor/WebView)
         if: steps.cfg.outputs.projectType == 'capacitor' || steps.cfg.outputs.projectType == 'webview'
         run: |
+          APP_NAME="${{ steps.cfg.outputs.appName }}"
+          PKG_ID="${{ steps.cfg.outputs.packageId }}"
+          PROJ_TYPE="${{ steps.cfg.outputs.projectType }}"
+          PROJ_URL="${{ steps.cfg.outputs.url }}"
           mkdir -p android-app
           cd android-app
-          if [ "${{ steps.cfg.outputs.projectType }}" = "webview" ]; then
-            mkdir -p www && echo '<script>location.href="${{ steps.cfg.outputs.url }}"</script>' > www/index.html
+          if [ "$PROJ_TYPE" = "webview" ]; then
+            mkdir -p www
+            echo "<script>location.href='$PROJ_URL'</script>" > www/index.html
             npm init -y >/dev/null
             npm install @capacitor/core @capacitor/cli @capacitor/android >/dev/null 2>&1
-            npx cap init "${{ steps.cfg.outputs.appName }}" "${{ steps.cfg.outputs.packageId }}" --web-dir www >/dev/null
+            npx cap init "$APP_NAME" "$PKG_ID" --web-dir www >/dev/null
           else
             cd .. && cp -r project/* android-app/ 2>/dev/null || true; cd android-app
             [ -f package.json ] || npm init -y >/dev/null
@@ -149,16 +153,13 @@ jobs:
           import json,os,sys
           root=sys.argv[1]
           wl=json.loads(os.environ.get("WHITELIST","[]"))
-          dom="\n".join(f'        <domain includeSubdomains="true">{d}</domain>' for d in wl)
-          nsc=f'''<?xml version="1.0" encoding="utf-8"?>
-      <network-security-config>
-          <domain-config cleartextTrafficPermitted="{"true" if wl else "false"}">
-      {dom or '        <domain includeSubdomains="true">localhost</domain>'}
-          </domain-config>
-      </network-security-config>'''
-          os.makedirs(f"{root}/app/src/main/res/xml",exist_ok=True)
-          open(f"{root}/app/src/main/res/xml/network_security_config.xml","w").write(nsc)
-          mf=f"{root}/app/src/main/AndroidManifest.xml"
+          dom="\n".join('        <domain includeSubdomains="true">'+d+'</domain>' for d in wl)
+          permit="true" if wl else "false"
+          domain_block=dom if dom else '        <domain includeSubdomains="true">localhost</domain>'
+          nsc='<?xml version="1.0" encoding="utf-8"?>\n<network-security-config>\n    <domain-config cleartextTrafficPermitted="'+permit+'">\n'+domain_block+'\n    </domain-config>\n</network-security-config>'
+          os.makedirs(root+"/app/src/main/res/xml",exist_ok=True)
+          open(root+"/app/src/main/res/xml/network_security_config.xml","w").write(nsc)
+          mf=root+"/app/src/main/AndroidManifest.xml"
           if os.path.exists(mf):
               s=open(mf).read()
               if "networkSecurityConfig" not in s:
@@ -175,46 +176,51 @@ jobs:
           import json,os,re,sys
           root=sys.argv[1]
           perms=json.loads(os.environ["PERMS"])
-          bf=f"{root}/app/build.gradle"
-          if not os.path.exists(bf): bf=f"{root}/app/build.gradle.kts"
+          pkg=os.environ["PKG"]
+          vcode=os.environ["VCODE"]
+          vname=os.environ["VNAME"]
+          orient=os.environ["ORIENT"]
+          bf=root+"/app/build.gradle"
+          if not os.path.exists(bf):
+              bf=root+"/app/build.gradle.kts"
           s=open(bf).read()
-          s=re.sub(r"applicationId\s*[= ]+\"[^\"]+\"",f'applicationId "{os.environ["PKG"]}"',s)
-          s=re.sub(r"versionCode\s*[= ]+\d+",f'versionCode {os.environ["VCODE"]}',s)
-          s=re.sub(r"versionName\s*[= ]+\"[^\"]+\"",f'versionName "{os.environ["VNAME"]}"',s)
+          s=re.sub(r'applicationId\s*[= ]+"[^"]+"',f'applicationId "{pkg}"',s)
+          s=re.sub(r'versionCode\s*[= ]+\d+',f'versionCode {vcode}',s)
+          s=re.sub(r'versionName\s*[= ]+"[^"]+"',f'versionName "{vname}"',s)
           if "signingConfigs" not in s:
               s=s.replace("android {",'''android {
-              signingConfigs {
-                  release {
-                      storeFile file("../../keystore/app.jks")
-                      storePassword "nexabuild123"
-                      keyAlias "nexabuild"
-                      keyPassword "nexabuild123"
-                      enableV1Signing true
-                      enableV2Signing true
-                      enableV3Signing true
-                  }
-              }''',1)
-              s=re.sub(r"buildTypes\s*{",'''buildTypes {
-                  release {
-                      signingConfig signingConfigs.release
-                      minifyEnabled true
-                      shrinkResources true
-                      proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-                  }''',s)
+            signingConfigs {
+                release {
+                    storeFile file("../../keystore/app.jks")
+                    storePassword "nexabuild123"
+                    keyAlias "nexabuild"
+                    keyPassword "nexabuild123"
+                    enableV1Signing true
+                    enableV2Signing true
+                    enableV3Signing true
+                }
+            }''',1)
+              s=re.sub(r'buildTypes\s*\{','''buildTypes {
+              release {
+                  signingConfig signingConfigs.release
+                  minifyEnabled true
+                  shrinkResources true
+                  proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+              }''',s)
           open(bf,"w").write(s)
-          mf=f"{root}/app/src/main/AndroidManifest.xml"
+          mf=root+"/app/src/main/AndroidManifest.xml"
           if os.path.exists(mf):
               m=open(mf).read()
               for p in perms:
-                  tag=f'<uses-permission android:name="android.permission.{p}"/>'
-                  if p not in m: m=m.replace("</manifest>",tag+"</manifest>")
-              if os.environ["ORIENT"]!="sensor":
+                  tag='<uses-permission android:name="android.permission.'+p+'"/>'
+                  if p not in m:
+                      m=m.replace("</manifest>",tag+"</manifest>")
+              if orient!="sensor":
                   m=re.sub(r'android:screenOrientation="[^"]*"','',m)
-                  m=m.replace("<activity",f'<activity android:screenOrientation="{os.environ["ORIENT"]}"',1)
+                  m=m.replace("<activity",'<activity android:screenOrientation="'+orient+'"',1)
               open(mf,"w").write(m)
-          # keep rules minimal sesuai tipe
-          rules=f"{root}/app/proguard-rules.pro"
-          open(rules,"a").write("\n-keep class ${{ steps.cfg.outputs.packageId }}.** {{ *; }}\n-dontwarn okhttp3.**\n-dontwarn okio.**\n")
+          rules=root+"/app/proguard-rules.pro"
+          open(rules,"a").write("\n-keep class "+pkg+".** { *; }\n-dontwarn okhttp3.**\n-dontwarn okio.**\n")
           PY
         env:
           PKG: ${{ steps.cfg.outputs.packageId }}
@@ -233,23 +239,23 @@ jobs:
           sizes={"mdpi":48,"hdpi":72,"xhdpi":96,"xxhdpi":144,"xxxhdpi":192}
           src=Image.open("icon.png").convert("RGBA")
           for d,s in sizes.items():
-              p=f"{root}/app/src/main/res/mipmap-{d}"
+              p=root+"/app/src/main/res/mipmap-"+d
               os.makedirs(p,exist_ok=True)
-              src.resize((s,s),Image.LANCZOS).save(f"{p}/ic_launcher.png")
-              src.resize((s,s),Image.LANCZOS).save(f"{p}/ic_launcher_round.png")
-          # adaptive foreground
+              src.resize((s,s),Image.LANCZOS).save(p+"/ic_launcher.png")
+              src.resize((s,s),Image.LANCZOS).save(p+"/ic_launcher_round.png")
           fg=Image.new("RGBA",(432,432),(0,0,0,0))
           fg.paste(src.resize((288,288),Image.LANCZOS),(72,72))
           for d,s in {"mdpi":108,"hdpi":162,"xhdpi":216,"xxhdpi":324,"xxxhdpi":432}.items():
-              p=f"{root}/app/src/main/res/mipmap-{d}"
+              p=root+"/app/src/main/res/mipmap-"+d
               os.makedirs(p,exist_ok=True)
-              fg.resize((s,s),Image.LANCZOS).save(f"{p}/ic_launcher_foreground.png")
+              fg.resize((s,s),Image.LANCZOS).save(p+"/ic_launcher_foreground.png")
           PY
 
       - name: Build APK (universal) + AAB
         run: |
           ROOT="${{ env.ANDROID_ROOT }}"
-          if [ "${{ steps.cfg.outputs.projectType }}" = "flutter" ]; then
+          PROJ_TYPE="${{ steps.cfg.outputs.projectType }}"
+          if [ "$PROJ_TYPE" = "flutter" ]; then
             cd project 2>/dev/null || cd flutter-app 2>/dev/null || true
             flutter pub get
             flutter build apk --release --split-per-abi
@@ -266,13 +272,16 @@ jobs:
 
       - name: Rename artifact dengan versi
         run: |
-          V="${{ steps.cfg.outputs.versionName }}-${{ steps.cfg.outputs.versionCode }}"
+          APP_NAME="${{ steps.cfg.outputs.appName }}"
+          VNAME="${{ steps.cfg.outputs.versionName }}"
+          VCODE="${{ steps.cfg.outputs.versionCode }}"
+          V="$VNAME-$VCODE"
           mkdir -p out
           cp ${{ env.APK_DIR }}/*.apk out/ 2>/dev/null || true
           cp ${{ env.AAB_DIR }}/*.aab out/ 2>/dev/null || true
           cd out
-          for f in *.apk; do [ -f "$f" ] && mv "$f" "nexabuild-${{ steps.cfg.outputs.appName }}-$V.apk"; done
-          for f in *.aab; do [ -f "$f" ] && mv "$f" "nexabuild-${{ steps.cfg.outputs.appName }}-$V.aab"; done
+          for f in *.apk; do [ -f "$f" ] && mv "$f" "nexabuild-${APP_NAME}-${V}.apk"; done
+          for f in *.aab; do [ -f "$f" ] && mv "$f" "nexabuild-${APP_NAME}-${V}.aab"; done
           ls -la
 
       - name: Upload ke GitHub Release
@@ -289,20 +298,24 @@ jobs:
           python3 - <<'PY'
           import json,base64,os,urllib.request
           cfg=json.load(open("nexabuild.config.json"))
-          tok=os.environ["GITHUB_TOKEN"]; repo=os.environ["REPO"]
-          api=f"https://api.github.com/repos/{repo}/contents/builds.json"
-          req=urllib.request.Request(api,headers={"Authorization":f"Bearer {tok}","Accept":"application/vnd.github+json"})
+          tok=os.environ["GITHUB_TOKEN"]
+          repo=os.environ["REPO"]
+          api="https://api.github.com/repos/"+repo+"/contents/builds.json"
+          req=urllib.request.Request(api,headers={"Authorization":"token "+tok,"Accept":"application/vnd.github+json"})
           sha=None; builds=[]
           try:
               d=json.load(urllib.request.urlopen(req))
-              sha=d["sha"]; builds=json.loads(base64.b64decode(d["content"]).replace(b"\n",b""))["builds"]
-          except Exception: pass
+              sha=d["sha"]
+              builds=json.loads(base64.b64decode(d["content"]).replace(b"\n",b""))["builds"]
+          except Exception:
+              pass
+          conclusion=os.environ["CONCLUSION"]
           for b in builds:
               if b.get("packageId")==cfg["packageId"] and b.get("versionCode")==cfg["versionCode"]:
-                  b["status"]="success" if os.environ["CONCLUSION"]=="success" else "failed"
+                  b["status"]="success" if conclusion=="success" else "failed"
           body=json.dumps({"builds":builds}).encode()
           data=json.dumps({"message":"NexaBuild: final status","content":base64.b64encode(body).decode(),"sha":sha,"branch":"main"}).encode()
-          r=urllib.request.Request(api,data=data,method="PUT",headers={"Authorization":f"Bearer {tok}","Accept":"application/vnd.github+json"})
+          r=urllib.request.Request(api,data=data,method="PUT",headers={"Authorization":"token "+tok,"Accept":"application/vnd.github+json"})
           urllib.request.urlopen(r)
           PY
         env:
