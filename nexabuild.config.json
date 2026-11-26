@@ -31,6 +31,8 @@
   "login": {
     "enabled": false
   },
-  "keystore": null,
+  "keystore": {
+    "mode": "auto"
+  },
   "whitelist": []
 }
