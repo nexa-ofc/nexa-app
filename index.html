@@ -9,242 +9,194 @@
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
+/* ==========================================
+   NEXABUILD v7 — NEOBRUTALISM LIME GREEN
+   GitHub API: direct fetch, "token" prefix (fix CORS + 401)
+   ========================================== */
 :root {
-  --bg: #e8f5e9;
-  --bg2: #f1faf2;
-  --surface: #ffffff;
-  --ink: #0d1f0a;
-  --green: #2e9e4f;
-  --green-mid: #3ab85e;
-  --green-dark: #1a5c2e;
-  --green-soft: #b8e6c4;
-  --green-pale: #e0f5e6;
-  --green-accent: #4eca70;
-  --mint: #d4f5e2;
-  --yellow: #fff9c4;
-  --red-soft: #fdecea;
-  --red: #e53935;
-  --ok: #2e9e4f;
-  --radius: 10px;
-  --ink-shadow: 4px 4px 0 #0d1f0a;
-  --ink-shadow-sm: 3px 3px 0 #0d1f0a;
-  --border: 2.5px solid #0d1f0a;
-  --font: 'Nunito', sans-serif;
-  --mono: 'Space Mono', monospace;
+  --lime:    #76FF03;
+  --lime-mid:#5ED400;
+  --lime-dk: #3D9900;
+  --lime-lt: #DCFFA0;
+  --lime-pale:#F0FFD6;
+  --bg:      #E8FFD0;
+  --surface: #FFFFFF;
+  --ink:     #0A1800;
+  --ink2:    #1E3A00;
+  --yellow:  #FFF176;
+  --sky:     #B3E5FC;
+  --lav:     #E1BEE7;
+  --peach:   #FFE0B2;
+  --mint:    #CCFF90;
+  --red:     #E53935;
+  --red-soft:#FFEBEE;
+  --ok:      #3D9900;
+  --border:  2.5px solid #0A1800;
+  --shadow:  5px 5px 0 #0A1800;
+  --shadow-sm:3px 3px 0 #0A1800;
+  --radius:  10px;
+  --font:    'Nunito', sans-serif;
+  --mono:    'Space Mono', monospace;
 }
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-html { scroll-behavior: smooth; }
-body {
-  font-family: var(--font);
-  color: var(--ink);
-  min-height: 100vh;
-  padding-bottom: 90px;
-  background-color: var(--bg);
-  /* Mint background + ornament garis */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font);color:var(--ink);min-height:100vh;padding-bottom:92px;font-weight:600;
+  background-color:var(--bg);
   background-image:
-    linear-gradient(rgba(46,158,79,.10) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(46,158,79,.10) 1px, transparent 1px),
-    radial-gradient(circle at 20% 20%, rgba(46,158,79,.07) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(46,158,79,.07) 0%, transparent 50%);
-  background-size: 32px 32px, 32px 32px, 100% 100%, 100% 100%;
+    linear-gradient(rgba(118,255,3,.16) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(118,255,3,.16) 1px,transparent 1px),
+    radial-gradient(ellipse at 15% 10%,rgba(118,255,3,.10) 0%,transparent 55%),
+    radial-gradient(ellipse at 85% 90%,rgba(94,212,0,.08) 0%,transparent 55%);
+  background-size:30px 30px,30px 30px,100% 100%,100% 100%;
 }
-button { font-family: inherit; cursor: pointer; }
-input, select, textarea { font-family: inherit; }
-:focus { outline: none; }
-.hidden { display: none !important; }
+button{font-family:var(--font);cursor:pointer}
+input,select,textarea{font-family:var(--font)}
+:focus{outline:none}
+.hidden{display:none!important}
 
-/* ===== CARDS ===== */
-.card {
-  background: var(--surface);
-  border: var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--ink-shadow);
+.card{background:var(--surface);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  background:var(--surface);border:var(--border);border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);padding:13px 20px;
+  font-weight:900;font-size:15px;color:var(--ink);
+  transition:transform .11s,box-shadow .11s,background .11s;
+  text-decoration:none;font-family:var(--font);
+  -webkit-user-select:none;user-select:none;
 }
+.btn:hover{background:var(--lime-pale)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #0A1800}
+.btn.primary{background:var(--lime);color:var(--ink)}
+.btn.primary:hover{background:var(--lime-mid)}
+.btn.danger{background:#FFCDD2}
+.btn.sm{padding:8px 13px;font-size:13px}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:var(--shadow-sm)!important}
 
-/* ===== BUTTONS ===== */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  background: var(--surface); border: var(--border); border-radius: var(--radius);
-  box-shadow: var(--ink-shadow-sm); padding: 13px 20px;
-  font-weight: 800; font-size: 15px; color: var(--ink);
-  transition: transform .12s, box-shadow .12s, background .12s;
-  text-decoration: none; font-family: var(--font); letter-spacing: .01em;
-  -webkit-user-select: none; user-select: none;
+/* Input: NO transform on focus — prevents double-border */
+.inp{
+  width:100%;background:var(--surface);border:var(--border);border-radius:var(--radius);
+  padding:13px 15px;font-size:15px;font-weight:700;color:var(--ink);
+  box-shadow:var(--shadow-sm);
+  transition:background .15s,border-color .15s;
+  outline:none;
 }
-.btn:hover { background: var(--green-pale); }
-.btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #0d1f0a; }
-.btn.primary { background: var(--green); color: #fff; border-color: var(--ink); }
-.btn.primary:hover { background: var(--green-mid); }
-.btn.danger { background: #ffcdd2; }
-.btn.sm { padding: 9px 14px; font-size: 13px; }
-.btn:disabled { opacity: .4; cursor: not-allowed; transform: none !important; box-shadow: var(--ink-shadow-sm) !important; }
+.inp:focus{background:var(--lime-pale);border-color:var(--lime-dk);box-shadow:var(--shadow-sm)}
+.inp.invalid{border-color:var(--red);background:#fff5f5}
 
-/* ===== INPUTS — FIX double border on focus ===== */
-.inp {
-  width: 100%;
-  background: var(--surface);
-  border: var(--border);
-  border-radius: var(--radius);
-  padding: 13px 15px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--ink);
-  box-shadow: var(--ink-shadow-sm);
-  transition: background .15s, border-color .15s;
-  /* NO transform on focus — ini yang bikin bingkai ganda */
-  outline: none;
-}
-.inp:focus {
-  background: var(--green-pale);
-  border-color: var(--green);
-  /* Shadow tetap sama, tidak berubah */
-  box-shadow: var(--ink-shadow-sm);
-}
-.inp.invalid { border-color: var(--red); background: #fff5f5; }
+.lbl{display:block;font-weight:900;font-size:11px;margin:0 0 6px 1px;text-transform:uppercase;letter-spacing:.09em;color:var(--lime-dk)}
+.hint{font-size:12.5px;color:var(--ink2);margin-top:5px;line-height:1.55;font-weight:600}
+.ferr{display:none;font-size:13px;color:var(--red);margin-top:7px;font-weight:800;background:var(--red-soft);border:2px solid var(--red);border-radius:8px;padding:9px 12px;line-height:1.55}
+.ferr.show{display:block;animation:pop .2s ease}
+.fok{display:none;font-size:13px;color:var(--ok);margin-top:7px;font-weight:800;background:var(--mint);border:2px solid var(--lime-dk);border-radius:8px;padding:9px 12px}
+.fok.show{display:block;animation:pop .2s ease}
+@keyframes pop{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
 
-/* ===== LABELS ===== */
-.lbl { display:block; font-weight:900; font-size:11.5px; margin:0 0 6px 1px; text-transform:uppercase; letter-spacing:.09em; color:var(--green-dark); }
-.hint { font-size:12.5px; color:#2d6b3a; margin-top:5px; line-height:1.55; font-weight:600; }
-.ferr { display:none; font-size:13px; color:var(--red); margin-top:7px; font-weight:700; background:var(--red-soft); border:2px solid var(--red); border-radius:8px; padding:9px 12px; line-height:1.55; }
-.ferr.show { display:block; animation:pop .2s ease; }
-.fok { display:none; font-size:13px; color:var(--ok); margin-top:7px; font-weight:700; background:var(--green-soft); border:2px solid var(--green); border-radius:8px; padding:9px 12px; }
-.fok.show { display:block; animation:pop .2s ease; }
-@keyframes pop { from{opacity:0;transform:scale(.96)} to{opacity:1;transform:scale(1)} }
+.pill{display:inline-flex;align-items:center;gap:5px;border:var(--border);border-radius:999px;padding:4px 12px;font-size:11.5px;font-weight:800;white-space:nowrap;background:var(--surface)}
+.sec-title{font-size:22px;font-weight:900;color:var(--ink);margin:0 0 14px;letter-spacing:.3px}
 
-.pill {
-  display:inline-flex; align-items:center; gap:5px;
-  border: var(--border); border-radius:999px;
-  padding:4px 12px; font-size:12px; font-weight:800;
-  white-space:nowrap; background:var(--surface);
-}
-.sec-title { font-size:22px; font-weight:900; color:var(--green-dark); margin:0 0 14px; letter-spacing:.3px; }
+.spin{width:22px;height:22px;border:3px solid var(--lime-dk);border-top-color:transparent;border-radius:50%;animation:rot .7s linear infinite;display:inline-block}
+.spin.sm{width:14px;height:14px;border-width:2.5px;border-color:var(--ink);border-top-color:transparent;vertical-align:-3px}
+@keyframes rot{to{transform:rotate(360deg)}}
 
-/* ===== SPINNER ===== */
-.spin { width:22px; height:22px; border:3px solid var(--green); border-top-color:transparent; border-radius:50%; animation:rot .7s linear infinite; display:inline-block; }
-.spin.sm { width:14px; height:14px; border-width:2.5px; border-color:#fff; border-top-color:transparent; vertical-align:-3px; }
-@keyframes rot { to{transform:rotate(360deg)} }
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;border:var(--border);border-radius:var(--radius);padding:12px 20px;font-weight:800;font-size:13px;z-index:500;opacity:0;pointer-events:none;transition:all .22s;max-width:88vw;text-align:center;box-shadow:var(--shadow-sm)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#offBanner{position:fixed;top:0;left:0;right:0;z-index:300;background:#FFCDD2;border-bottom:var(--border);padding:9px 16px;font-weight:800;font-size:13px;text-align:center;color:var(--red)}
+#modalOv{position:fixed;inset:0;background:rgba(10,24,0,.52);z-index:400;display:none;align-items:center;justify-content:center;padding:20px}
+#modalBox{width:100%;max-width:400px;padding:22px;animation:pop .2s ease}
+#modalTitle{font-size:18px;font-weight:900;color:var(--ink);margin-bottom:9px}
+#modalBody{font-size:14px;line-height:1.65;font-weight:600}
 
-/* ===== TOAST ===== */
-#toast { position:fixed; left:50%; bottom:100px; transform:translateX(-50%) translateY(20px); background:var(--green-dark); color:#fff; border:var(--border); border-radius:var(--radius); padding:12px 20px; font-weight:800; font-size:13px; z-index:500; opacity:0; pointer-events:none; transition:all .22s; max-width:88vw; text-align:center; box-shadow:var(--ink-shadow-sm); }
-#toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+/* AUTH */
+#authScr{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-card{width:100%;max-width:440px;padding:28px;animation:slideUp .35s ease}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.auth-logo{display:flex;align-items:center;gap:14px;margin-bottom:22px}
+.logo-box{width:60px;height:60px;background:var(--lime);border:var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm);flex:none}
+.wordmark{font-size:30px;font-weight:900;color:var(--ink);line-height:1;letter-spacing:.3px}
+.auth-sub{font-size:13px;font-weight:700;color:var(--ink2);margin-top:4px}
+.step-badge{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:900;background:var(--ink);color:var(--lime);border:var(--border);border-radius:999px;padding:5px 14px;margin-bottom:14px;letter-spacing:.07em}
+.auth-user{display:flex;align-items:center;gap:12px;border:var(--border);border-radius:var(--radius);padding:11px;background:var(--mint);margin:14px 0;box-shadow:var(--shadow-sm)}
+.auth-user img{width:44px;height:44px;border-radius:8px;border:var(--border)}
+.scope-note{font-size:12.5px;color:var(--ink2);background:var(--yellow);border:var(--border);border-radius:var(--radius);padding:11px 13px;margin-top:14px;line-height:1.6;font-weight:700}
 
-/* ===== OFFLINE ===== */
-#offBanner { position:fixed; top:0; left:0; right:0; z-index:300; background:#ffcdd2; border-bottom:var(--border); padding:9px 16px; font-weight:800; font-size:13px; text-align:center; color:var(--red); }
+/* SHELL */
+#appShell{display:none}
+#topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(232,255,208,.95);backdrop-filter:blur(10px);border-bottom:var(--border);padding:11px 15px}
+.top-logo{width:34px;height:34px;background:var(--lime);border:var(--border);border-radius:9px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-sm)}
+#dov{position:fixed;inset:0;background:rgba(10,24,0,.45);z-index:160;display:none}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:min(290px,84vw);background:var(--surface);border-right:var(--border);z-index:170;transform:translateX(-105%);transition:transform .24s cubic-bezier(.2,.8,.2,1);display:flex;flex-direction:column}
+#drawer.open{transform:translateX(0)}
+.d-head{display:flex;align-items:center;justify-content:space-between;padding:15px;border-bottom:var(--border);background:var(--lime-pale)}
+.d-nav{flex:1;overflow-y:auto;padding:13px}
+.d-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:12px 13px;margin-bottom:9px;font-weight:800;font-size:14px;box-shadow:var(--shadow-sm);transition:transform .1s,background .1s,box-shadow .1s;font-family:var(--font)}
+.d-item:hover{background:var(--mint);transform:translate(-2px,-2px);box-shadow:var(--shadow)}
+.ticker-wrap{overflow:hidden;border-bottom:var(--border);background:var(--surface)}
+.ticker{display:flex;gap:10px;padding:9px 0;width:max-content;animation:marquee 30s linear infinite}
+.ticker:hover{animation-play-state:paused}
+@keyframes marquee{to{transform:translateX(-50%)}}
+#bnav{position:fixed;left:0;right:0;bottom:0;z-index:130;display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:var(--surface);border-top:var(--border);padding:8px 8px calc(8px + env(safe-area-inset-bottom))}
+.nav-it{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:var(--border);border-radius:var(--radius);padding:8px 4px;font-size:10.5px;font-weight:800;color:var(--ink);transition:all .1s;font-family:var(--font)}
+.nav-it:hover{transform:translateY(-2px);box-shadow:var(--shadow-sm)}
+.nav-it.active{background:var(--lime);color:var(--ink);box-shadow:var(--shadow-sm)}
 
-/* ===== MODAL ===== */
-#modalOv { position:fixed; inset:0; background:rgba(13,31,10,.5); z-index:400; display:none; align-items:center; justify-content:center; padding:20px; }
-#modalBox { width:100%; max-width:400px; padding:22px; animation:pop .2s ease; }
-#modalTitle { font-size:18px; font-weight:900; color:var(--green-dark); margin-bottom:9px; }
-#modalBody { font-size:14px; line-height:1.65; font-weight:600; }
-#modalInpWrap { margin-top:11px; }
+/* HOME */
+.module{padding:13px;max-width:700px;margin:0 auto}
+.acc-bar{display:flex;align-items:center;gap:12px;padding:13px;margin-bottom:11px}
+.acc-bar img{width:50px;height:50px;border-radius:8px;border:var(--border)}
+.acc-name{font-weight:900;font-size:15.5px}
+.acc-role{font-size:12px;color:var(--ink2);font-weight:700}
+.acc-right{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;border:2px solid var(--ink)}
+.dot.on{background:#22c55e}.dot.off{background:var(--red)}
+.w-chip{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;background:var(--sky);border:var(--border);border-radius:999px;padding:3px 10px}
+.ind-stack{display:flex;flex-direction:column;gap:8px;margin-bottom:11px}
+.ind{display:flex;align-items:center;gap:10px;padding:11px 13px;font-size:13px;font-weight:700}
+.ind .bar{flex:1;height:9px;border:2px solid var(--ink);border-radius:4px;overflow:hidden;background:var(--bg)}
+.ind .bar i{display:block;height:100%;background:var(--lime-mid);transition:width .4s}
+.home-bot{display:flex;align-items:stretch;gap:10px}
+#clockBox{flex:1;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:22px;padding:13px;color:var(--ink);letter-spacing:2px}
+#quranBox{width:95px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;background:var(--lav);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm);font-weight:800;font-size:11.5px;padding:10px;transition:transform .1s,box-shadow .1s;font-family:var(--font)}
+#quranBox:hover{transform:translate(-2px,-2px);box-shadow:var(--shadow)}
 
-/* ===== AUTH ===== */
-#authScr { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
-.auth-card { width:100%; max-width:440px; padding:28px; animation:slideUp .35s ease; }
-@keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:none} }
-.auth-logo { display:flex; align-items:center; gap:14px; margin-bottom:20px; }
-.logo-icon { width:58px; height:58px; background:var(--green); border:var(--border); border-radius:14px; display:flex; align-items:center; justify-content:center; box-shadow:var(--ink-shadow-sm); flex:none; }
-.wordmark { font-size:30px; font-weight:900; color:var(--green-dark); line-height:1; letter-spacing:.3px; }
-.auth-sub { font-size:13px; font-weight:700; color:#2d6b3a; margin-top:4px; }
-.step-badge { display:inline-flex; align-items:center; gap:7px; font-size:11px; font-weight:900; background:var(--green); color:#fff; border:var(--border); border-radius:999px; padding:4px 13px; margin-bottom:14px; letter-spacing:.07em; }
-.auth-user { display:flex; align-items:center; gap:12px; border:var(--border); border-radius:var(--radius); padding:11px; background:var(--mint); margin:14px 0; box-shadow:var(--ink-shadow-sm); }
-.auth-user img { width:44px; height:44px; border-radius:8px; border:var(--border); }
-.scope-note { font-size:12.5px; color:#1a4a22; background:var(--yellow); border:var(--border); border-radius:var(--radius); padding:11px 13px; margin-top:14px; line-height:1.6; font-weight:700; }
+/* QURAN */
+.surah-item{display:flex;align-items:center;gap:11px;width:100%;text-align:left;background:var(--surface);border:var(--border);border-radius:var(--radius);padding:11px 12px;margin-bottom:8px;box-shadow:var(--shadow-sm);font-weight:700;transition:transform .1s,background .1s,box-shadow .1s}
+.surah-item:hover{background:var(--yellow);transform:translate(-2px,-2px);box-shadow:var(--shadow)}
+.ayah{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:13px;margin-bottom:10px}
+.ayah-ar{font-size:21px;line-height:2.1;text-align:right;direction:rtl;margin-bottom:9px}
+.ayah-id{font-size:13.5px;color:#333;line-height:1.6;font-weight:600}
+.ayah-num{display:inline-flex;align-items:center;justify-content:center;min-width:26px;height:26px;border:var(--border);border-radius:5px;background:var(--yellow);font-weight:900;font-size:11.5px;margin-bottom:7px}
 
-/* ===== TOPBAR ===== */
-#appShell { display:none; }
-#topbar { position:sticky; top:0; z-index:100; display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(232,245,233,.93); backdrop-filter:blur(10px); border-bottom:var(--border); padding:11px 15px; }
-.top-logo { width:32px; height:32px; background:var(--green); border:var(--border); border-radius:8px; display:flex; align-items:center; justify-content:center; }
-
-/* ===== DRAWER ===== */
-#dov { position:fixed; inset:0; background:rgba(13,31,10,.48); z-index:160; display:none; }
-#drawer { position:fixed; top:0; left:0; bottom:0; width:min(290px,84vw); background:var(--surface); border-right:var(--border); z-index:170; transform:translateX(-105%); transition:transform .24s cubic-bezier(.2,.8,.2,1); display:flex; flex-direction:column; }
-#drawer.open { transform:translateX(0); }
-.d-head { display:flex; align-items:center; justify-content:space-between; padding:15px; border-bottom:var(--border); background:var(--green-pale); }
-.d-nav { flex:1; overflow-y:auto; padding:13px; }
-.d-item { display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:var(--surface); border:var(--border); border-radius:var(--radius); padding:12px 13px; margin-bottom:9px; font-weight:800; font-size:14px; box-shadow:var(--ink-shadow-sm); transition:transform .1s, background .1s; font-family:var(--font); }
-.d-item:hover { background:var(--green-soft); transform:translate(-2px,-2px); box-shadow:var(--ink-shadow); }
-
-/* ===== TICKER ===== */
-.ticker-wrap { overflow:hidden; border-bottom:var(--border); background:var(--surface); }
-.ticker { display:flex; gap:10px; padding:9px 0; width:max-content; animation:marquee 28s linear infinite; }
-.ticker:hover { animation-play-state:paused; }
-@keyframes marquee { to{transform:translateX(-50%)} }
-
-/* ===== BOTTOM NAV ===== */
-#bnav { position:fixed; left:0; right:0; bottom:0; z:130; display:grid; grid-template-columns:repeat(4,1fr); gap:5px; background:var(--surface); border-top:var(--border); padding:8px 8px calc(8px + env(safe-area-inset-bottom)); }
-.nav-it { display:flex; flex-direction:column; align-items:center; gap:3px; background:none; border:var(--border); border-radius:var(--radius); padding:8px 4px; font-size:10.5px; font-weight:800; color:var(--ink); transition:all .1s; font-family:var(--font); }
-.nav-it:hover { transform:translateY(-2px); box-shadow:var(--ink-shadow-sm); }
-.nav-it.active { background:var(--green); color:#fff; box-shadow:var(--ink-shadow-sm); }
-
-/* ===== MODULE ===== */
-.module { padding:13px; max-width:700px; margin:0 auto; }
-
-/* ===== HOME ===== */
-.acc-bar { display:flex; align-items:center; gap:12px; padding:13px; margin-bottom:11px; }
-.acc-bar img { width:50px; height:50px; border-radius:8px; border:var(--border); }
-.acc-name { font-weight:900; font-size:15.5px; }
-.acc-role { font-size:12px; color:#2d6b3a; font-weight:700; }
-.acc-right { margin-left:auto; display:flex; flex-direction:column; align-items:flex-end; gap:6px; }
-.dot { width:10px; height:10px; border-radius:50%; border:2px solid var(--ink); }
-.dot.on { background:#22c55e; } .dot.off { background:var(--red); }
-.w-chip { display:flex; align-items:center; gap:5px; font-size:11.5px; font-weight:800; background:#b3e5fc; border:var(--border); border-radius:999px; padding:3px 10px; }
-.ind-stack { display:flex; flex-direction:column; gap:8px; margin-bottom:11px; }
-.ind { display:flex; align-items:center; gap:10px; padding:11px 13px; font-size:13px; font-weight:700; }
-.ind .bar { flex:1; height:9px; border:2px solid var(--ink); border-radius:4px; overflow:hidden; background:#e8f5e9; }
-.ind .bar i { display:block; height:100%; background:var(--green-mid); transition:width .4s; }
-.home-bot { display:flex; align-items:stretch; gap:10px; }
-#clockBox { flex:1; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:22px; padding:13px; color:var(--green-dark); letter-spacing:2px; }
-#quranBox { width:95px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5px; background:var(--mint); border:var(--border); border-radius:var(--radius); box-shadow:var(--ink-shadow-sm); font-weight:800; font-size:11.5px; padding:10px; transition:transform .1s; font-family:var(--font); }
-#quranBox:hover { transform:translate(-2px,-2px); box-shadow:var(--ink-shadow); }
-
-/* ===== QURAN ===== */
-.surah-item { display:flex; align-items:center; gap:11px; width:100%; text-align:left; background:var(--surface); border:var(--border); border-radius:var(--radius); padding:11px 12px; margin-bottom:8px; box-shadow:var(--ink-shadow-sm); font-weight:700; transition:transform .1s, background .1s; }
-.surah-item:hover { background:var(--yellow); transform:translate(-2px,-2px); box-shadow:var(--ink-shadow); }
-.ayah { border:var(--border); border-radius:var(--radius); background:var(--surface); box-shadow:var(--ink-shadow-sm); padding:13px; margin-bottom:10px; }
-.ayah-ar { font-size:21px; line-height:2; text-align:right; direction:rtl; margin-bottom:9px; }
-.ayah-id { font-size:13.5px; color:#333; line-height:1.6; font-weight:600; }
-.ayah-num { display:inline-flex; align-items:center; justify-content:center; min-width:26px; height:26px; border:var(--border); border-radius:5px; background:var(--yellow); font-weight:900; font-size:11.5px; margin-bottom:7px; }
-
-/* ===== BUILD ===== */
-.b-step { border:var(--border); border-radius:var(--radius); background:var(--surface); box-shadow:var(--ink-shadow-sm); padding:14px; margin-bottom:11px; }
-.b-head { display:flex; align-items:center; gap:9px; margin-bottom:12px; }
-.b-num { width:27px; height:27px; border:var(--border); border-radius:7px; background:var(--green); color:#fff; font-weight:900; font-size:13.5px; display:flex; align-items:center; justify-content:center; flex:none; }
-.perm-grid { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
-.perm-grid label { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:700; background:var(--green-pale); border:2px solid var(--ink); border-radius:7px; padding:8px 9px; cursor:pointer; transition:background .1s; }
-.perm-grid label:has(input:checked) { background:var(--green-soft); }
-.perm-grid input { accent-color:var(--green); width:15px; height:15px; }
-.opt-panel { border:var(--border); border-radius:var(--radius); background:var(--green-pale); padding:12px; margin-bottom:10px; }
-.opt-title { font-weight:900; font-size:11.5px; text-transform:uppercase; letter-spacing:.07em; color:var(--green-dark); margin-bottom:8px; }
-.chk-row { display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:700; margin-bottom:7px; cursor:pointer; }
-.chk-row input { accent-color:var(--green); width:16px; height:16px; }
-#termBody { background:#071507; color:#a8d5b0; font-family:var(--mono); font-size:11.5px; line-height:1.75; padding:12px; height:260px; overflow-y:auto; }
-.state-box { border:var(--border); border-radius:var(--radius); background:var(--surface); box-shadow:var(--ink-shadow-sm); padding:22px; text-align:center; font-size:14px; line-height:1.6; font-weight:700; }
-@media(max-width:400px) { .perm-grid { grid-template-columns:1fr; } }
-
-/* ===== CHAT ===== */
-.cbubble { border:var(--border); border-radius:14px; padding:9px 13px; font-size:14px; box-shadow:var(--ink-shadow-sm); line-height:1.5; word-break:break-word; font-weight:600; }
-
-/* ===== SVG ICON system — outline style, consistent stroke ===== */
-svg.ic { width:20px; height:20px; flex:none; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; display:inline-block; vertical-align:middle; }
-svg.ic.sm { width:16px; height:16px; }
-svg.ic.lg { width:24px; height:24px; }
-svg.ic.wh { stroke:#fff; }
+/* BUILD */
+.b-step{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:14px;margin-bottom:11px}
+.b-head{display:flex;align-items:center;gap:9px;margin-bottom:12px}
+.b-num{width:28px;height:28px;border:var(--border);border-radius:7px;background:var(--lime);color:var(--ink);font-weight:900;font-size:14px;display:flex;align-items:center;justify-content:center;flex:none}
+.perm-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.perm-grid label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;background:var(--lime-pale);border:2px solid var(--ink);border-radius:7px;padding:8px 9px;cursor:pointer;transition:background .1s}
+.perm-grid label:has(input:checked){background:var(--mint)}
+.perm-grid input{accent-color:var(--lime-dk);width:15px;height:15px}
+.opt-panel{border:var(--border);border-radius:var(--radius);background:var(--lime-pale);padding:12px;margin-bottom:10px}
+.opt-title{font-weight:900;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink2);margin-bottom:8px}
+.chk-row{display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:700;margin-bottom:7px;cursor:pointer}
+.chk-row input{accent-color:var(--lime-dk);width:16px;height:16px}
+#termBody{background:#060D00;color:#A8D580;font-family:var(--mono);font-size:11.5px;line-height:1.75;padding:12px;height:260px;overflow-y:auto}
+.state-box{border:var(--border);border-radius:var(--radius);background:var(--surface);box-shadow:var(--shadow-sm);padding:22px;text-align:center;font-size:14px;line-height:1.6;font-weight:700}
+.cbubble{border:var(--border);border-radius:14px;padding:9px 13px;font-size:14px;box-shadow:var(--shadow-sm);line-height:1.5;word-break:break-word;font-weight:600}
+@media(max-width:400px){.perm-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div id="offBanner" class="hidden">Koneksi internet terputus.</div>
+<div id="offBanner" class="hidden">⚠ Koneksi internet terputus.</div>
 <div id="toast"></div>
 
 <!-- AUTH -->
 <div id="authScr">
   <div class="card auth-card">
     <div class="auth-logo">
-      <div class="logo-icon">
-        <!-- Logo NexaBuild: segitiga A outline -->
-        <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17 5 L31 29 H3 Z" stroke="#fff" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
-          <line x1="10" y1="22" x2="24" y2="22" stroke="#fff" stroke-width="2.5" stroke-linecap="round"/>
+      <div class="logo-box">
+        <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+          <path d="M17 4L31 30H3L17 4Z" stroke="#0A1800" stroke-width="2.8" stroke-linejoin="round"/>
+          <line x1="10.5" y1="22" x2="23.5" y2="22" stroke="#0A1800" stroke-width="2.8" stroke-linecap="round"/>
         </svg>
       </div>
       <div>
@@ -260,7 +212,13 @@ svg.ic.wh { stroke:#fff; }
       <input class="inp" id="tokIn" type="password" placeholder="ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
       <div class="ferr" id="tokErr"></div>
       <button class="btn primary" id="tokBtn" style="width:100%;margin-top:10px">
-        <svg class="ic wh" viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="m15 7-6.5 6.5M15 7h3v3"/></svg>
+        <!-- Key icon: proper geometry, outline only -->
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="7.5" cy="15.5" r="4.5"/>
+          <path d="M15.5 8.5H19.5V12.5"/>
+          <line x1="17.5" y1="8.5" x2="17.5" y2="10.5"/>
+          <line x1="10.6" y1="13.4" x2="15.5" y2="8.5"/>
+        </svg>
         Periksa Token
       </button>
       <div class="scope-note">
@@ -275,16 +233,19 @@ svg.ic.wh { stroke:#fff; }
         <img id="av1" alt="">
         <div>
           <div id="uName" style="font-weight:900"></div>
-          <div id="uLogin" style="font-size:12px;color:#2d6b3a;font-weight:700"></div>
+          <div id="uLogin" style="font-size:12px;color:var(--ink2);font-weight:700"></div>
         </div>
         <span class="pill" style="margin-left:auto;background:var(--mint)">Token OK ✓</span>
       </div>
       <label class="lbl" for="repoIn">Nama Repo (owner/nama-repo)</label>
       <input class="inp" id="repoIn" type="text" placeholder="username/nexabuild-app" autocomplete="off" spellcheck="false">
       <div class="ferr" id="repoErr"></div>
-      <div class="fok" id="repoOk"></div>
+      <div class="fok"  id="repoOk"></div>
       <button class="btn primary" id="repoBtn" style="width:100%;margin-top:10px">
-        <svg class="ic wh" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/>
+          <path d="M6 8.5V15.5"/><path d="M8.5 6H15.5"/><path d="M15.8 7.8L8.2 15.5"/>
+        </svg>
         Periksa &amp; Sambungkan Repo
       </button>
       <button class="btn sm" id="backTok" style="width:100%;margin-top:9px">← Ganti token</button>
@@ -297,7 +258,7 @@ svg.ic.wh { stroke:#fff; }
         <img id="av2" alt="">
         <div>
           <div id="uName2" style="font-weight:900"></div>
-          <div id="uRepo2" style="font-size:12px;color:#2d6b3a;font-weight:700"></div>
+          <div id="uRepo2" style="font-size:12px;color:var(--ink2);font-weight:700"></div>
         </div>
         <span class="pill" style="margin-left:auto;background:var(--mint)">Repo OK ✓</span>
       </div>
@@ -306,7 +267,9 @@ svg.ic.wh { stroke:#fff; }
       <div class="ferr" id="issErr"></div>
       <div class="hint">Cara buat: buka repo → tab <b>Issues</b> → New issue → Submit → catat nomornya.</div>
       <button class="btn primary" id="enterBtn" style="width:100%;margin-top:12px">
-        <svg class="ic wh" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
         Masuk Dashboard
       </button>
       <button class="btn sm" id="backRepo" style="width:100%;margin-top:9px">← Ganti repo</button>
@@ -318,13 +281,13 @@ svg.ic.wh { stroke:#fff; }
 <div id="appShell">
   <header id="topbar">
     <button class="btn sm" id="drawerBtn">
-      <svg class="ic" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h12"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
     </button>
-    <div class="wordmark" style="font-size:20px">NexaBuild</div>
+    <div class="wordmark" style="font-size:21px">NexaBuild</div>
     <div class="top-logo">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-        <path d="M12 3 L22 21 H2 Z" stroke="#fff" stroke-width="2.2" stroke-linejoin="round"/>
-        <line x1="7" y1="16" x2="17" y2="16" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+        <path d="M12 3L22 21H2L12 3Z" stroke="#0A1800" stroke-width="2.4" stroke-linejoin="round"/>
+        <line x1="7.5" y1="16" x2="16.5" y2="16" stroke="#0A1800" stroke-width="2.4" stroke-linecap="round"/>
       </svg>
     </div>
   </header>
@@ -334,33 +297,43 @@ svg.ic.wh { stroke:#fff; }
     <div class="d-head">
       <span class="wordmark" style="font-size:19px">NexaBuild</span>
       <button class="btn sm" id="drawerClose">
-        <svg class="ic" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
     <nav class="d-nav">
       <button class="d-item" data-d="connection">
-        <svg class="ic" viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
-        Koneksi GitHub
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/>
+        </svg>Koneksi GitHub
       </button>
       <button class="d-item" data-d="keystore">
-        <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Pengaturan Keystore
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          <circle cx="12" cy="16" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>Pengaturan Keystore
       </button>
       <button class="d-item" data-d="profile">
-        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Profil &amp; Role
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>Profil &amp; Role
       </button>
       <button class="d-item" data-d="chatissue">
-        <svg class="ic" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-        Issue Chat Global
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>Issue Chat Global
       </button>
       <button class="d-item" data-d="about">
-        <svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-        Tentang Aplikasi
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>Tentang Aplikasi
       </button>
       <button class="d-item" data-d="logout" style="color:var(--red)">
-        <svg class="ic" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Putuskan Koneksi
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>Putuskan Koneksi
       </button>
     </nav>
   </aside>
@@ -371,13 +344,12 @@ svg.ic.wh { stroke:#fff; }
       <div class="ticker-wrap"><div class="ticker" id="ticker"></div></div>
       <div class="card acc-bar" style="margin-top:11px">
         <img id="hAvatar" alt="" style="width:50px;height:50px;border-radius:8px;border:var(--border)">
-        <div>
-          <div class="acc-name" id="hName">—</div>
-          <div class="acc-role" id="hRole">Developer</div>
-        </div>
+        <div><div class="acc-name" id="hName">—</div><div class="acc-role" id="hRole">Developer</div></div>
         <div class="acc-right">
           <div class="w-chip">
-            <svg class="ic sm" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
+            </svg>
             <span id="wTxt">…</span>
           </div>
           <div style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:800">
@@ -387,22 +359,22 @@ svg.ic.wh { stroke:#fff; }
       </div>
       <div class="ind-stack">
         <div class="card ind">
-          <svg class="ic" viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/><line x1="6" y1="12" x2="12" y2="12" stroke-width="2.5"/></svg>
-          <span style="min-width:88px">Baterai</span><div class="bar"><i id="batBar"></i></div><span id="batTxt" style="min-width:48px;text-align:right">…</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2"/><line x1="5" y1="12" x2="13" y2="12"/></svg>
+          <span style="min-width:84px">Baterai</span><div class="bar"><i id="batBar"></i></div><span id="batTxt" style="min-width:46px;text-align:right">…</span>
         </div>
         <div class="card ind">
-          <svg class="ic" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
-          <span style="min-width:88px">Storage</span><div class="bar"><i id="stoBar"></i></div><span id="stoTxt" style="min-width:48px;text-align:right">…</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+          <span style="min-width:84px">Storage</span><div class="bar"><i id="stoBar"></i></div><span id="stoTxt" style="min-width:46px;text-align:right">…</span>
         </div>
         <div class="card ind">
-          <svg class="ic" viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/></svg>
-          <span style="min-width:88px">RAM (est.)</span><div class="bar"><i id="ramBar"></i></div><span id="ramTxt" style="min-width:48px;text-align:right">…</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10v4M10 10v4M14 10v4M18 10v4"/></svg>
+          <span style="min-width:84px">RAM (est.)</span><div class="bar"><i id="ramBar"></i></div><span id="ramTxt" style="min-width:46px;text-align:right">…</span>
         </div>
       </div>
       <div class="home-bot">
         <div class="card" id="clockBox">--:--:--</div>
         <button id="quranBox">
-          <svg class="ic" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
           Al-Qur'an
         </button>
       </div>
@@ -411,7 +383,7 @@ svg.ic.wh { stroke:#fff; }
     <!-- QURAN -->
     <section class="module hidden" id="mod-quran">
       <button class="btn sm" id="qBack" style="margin-bottom:13px">
-        <svg class="ic" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Kembali
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg> Kembali
       </button>
       <div id="qContent"></div>
     </section>
@@ -419,24 +391,15 @@ svg.ic.wh { stroke:#fff; }
     <!-- BUILD -->
     <section class="module hidden" id="mod-build">
       <h2 class="sec-title">Build Project</h2>
-
-      <!-- Step 1: Sumber -->
       <div class="b-step">
         <div class="b-head"><span class="b-num">1</span><span style="font-weight:900">Sumber Project</span></div>
         <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:11px">
-          <button class="btn sm" id="srcZip">
-            <svg class="ic" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><circle cx="10" cy="16" r="2"/><path d="M10 14V7h4"/></svg> Upload ZIP
-          </button>
-          <button class="btn sm" id="srcUrl">
-            <svg class="ic" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> URL Website
-          </button>
+          <button class="btn sm" id="srcZip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8l-6-6H6a2 2 0 0 0-2 2v4"/><path d="M14 2v6h6"/><circle cx="10" cy="16" r="2"/><path d="M10 14V8h4"/></svg> Upload ZIP</button>
+          <button class="btn sm" id="srcUrl"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> URL Website</button>
           <input type="file" id="zipIn" accept=".zip" class="hidden">
         </div>
-        <div id="urlWrap" class="hidden">
-          <input class="inp" id="urlIn" type="url" placeholder="https://situskamu.com">
-          <div class="ferr" id="urlErr"></div>
-        </div>
-        <div id="zipInfo" class="hidden" style="font-size:13px;font-weight:700;background:#b3e5fc;border:var(--border);border-radius:var(--radius);padding:9px 12px;margin-top:9px"></div>
+        <div id="urlWrap" class="hidden"><input class="inp" id="urlIn" type="url" placeholder="https://situskamu.com"><div class="ferr" id="urlErr"></div></div>
+        <div id="zipInfo" class="hidden" style="font-size:13px;font-weight:700;background:var(--sky);border:var(--border);border-radius:var(--radius);padding:9px 12px;margin-top:9px"></div>
         <div style="margin-top:11px">
           <span class="lbl">Tipe project terdeteksi</span>
           <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
@@ -446,8 +409,6 @@ svg.ic.wh { stroke:#fff; }
           <div class="ferr" id="typeErr"></div>
         </div>
       </div>
-
-      <!-- Step 2: Identitas -->
       <div class="b-step">
         <div class="b-head"><span class="b-num">2</span><span style="font-weight:900">Identitas Aplikasi</span></div>
         <div style="display:grid;gap:11px">
@@ -461,36 +422,26 @@ svg.ic.wh { stroke:#fff; }
           <div>
             <span class="lbl">Icon aplikasi</span>
             <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-              <canvas id="iconPrev" width="96" height="96" style="border:var(--border);border-radius:var(--radius);box-shadow:var(--ink-shadow-sm)"></canvas>
+              <canvas id="iconPrev" width="96" height="96" style="border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow-sm)"></canvas>
               <div style="flex:1;min-width:160px">
-                <button class="btn sm" id="upIcon">
-                  <svg class="ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg> Upload gambar
-                </button>
+                <button class="btn sm" id="upIcon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg> Upload gambar</button>
                 <input type="file" id="iconIn" accept="image/*" class="hidden">
                 <div class="hint" id="iconHint">Icon default dibuat dari inisial nama.</div>
               </div>
             </div>
           </div>
-          <div>
-            <span class="lbl">Permission Android</span>
-            <div id="permList" class="perm-grid"></div>
-          </div>
+          <div><span class="lbl">Permission Android</span><div id="permList" class="perm-grid"></div></div>
         </div>
       </div>
-
-      <!-- Step 3: Opsional -->
       <div class="b-step">
         <button class="btn" id="featToggle" style="width:100%;justify-content:space-between">
-          <span style="display:flex;align-items:center;gap:8px">
-            <svg class="ic" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Fitur Opsional
-          </span>
-          <svg class="ic" id="featChev" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>
+          <span style="display:flex;align-items:center;gap:8px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg> Fitur Opsional</span>
+          <svg id="featChev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </button>
         <div id="featBody" class="hidden" style="margin-top:14px;display:grid;gap:11px">
           <div><label class="lbl" for="splashTxt">Teks splash screen</label><input class="inp" id="splashTxt" placeholder="NexaBuild App"></div>
-          <div><label class="lbl" for="orient">Orientasi layar</label>
-            <select class="inp" id="orient"><option value="portrait">Portrait (default)</option><option value="landscape">Landscape</option><option value="sensor">Sensor (otomatis)</option></select></div>
-          <div><label class="lbl" for="themeClr">Warna tema</label><input class="inp" id="themeClr" type="color" value="#c8e6c9" style="height:46px;padding:5px"></div>
+          <div><label class="lbl" for="orient">Orientasi layar</label><select class="inp" id="orient"><option value="portrait">Portrait (default)</option><option value="landscape">Landscape</option><option value="sensor">Sensor (otomatis)</option></select></div>
+          <div><label class="lbl" for="themeClr">Warna tema</label><input class="inp" id="themeClr" type="color" value="#76FF03" style="height:46px;padding:5px"></div>
           <div class="opt-panel">
             <div class="opt-title">Opsi WebView</div>
             <label class="chk-row"><input type="checkbox" id="optZoom" checked> Izinkan zoom</label>
@@ -498,11 +449,7 @@ svg.ic.wh { stroke:#fff; }
             <label class="chk-row"><input type="checkbox" id="optBack" checked> Tombol back menutup app</label>
             <label class="chk-row" style="margin-bottom:0"><input type="checkbox" id="optOffline"> Halaman offline lokal</label>
           </div>
-          <div>
-            <label class="lbl" for="privUrl">Privacy Policy URL</label>
-            <input class="inp" id="privUrl" type="url" placeholder="https://situskamu.com/privacy">
-            <span class="pill" style="background:#ffe0b2;margin-top:7px;font-size:11px">Wajib sebelum submit Play Store</span>
-          </div>
+          <div><label class="lbl" for="privUrl">Privacy Policy URL</label><input class="inp" id="privUrl" type="url" placeholder="https://situskamu.com/privacy"><span class="pill" style="background:var(--peach);margin-top:7px;font-size:11px">Wajib sebelum submit Play Store</span></div>
           <label class="chk-row"><input type="checkbox" id="optPush"> Push Notification (FCM)</label>
           <div id="pushWrap" class="hidden"><label class="lbl">google-services.json</label><input class="inp" id="gjsonIn" type="file" accept=".json"><div class="hint" id="gjsonHint">File config Firebase project kamu.</div></div>
           <div>
@@ -517,45 +464,28 @@ svg.ic.wh { stroke:#fff; }
               <input type="file" id="ksIn" accept=".jks,.keystore" class="hidden">
             </div>
             <div id="ksStatus" style="font-size:13px;font-weight:700;margin-bottom:9px">Belum ada keystore — dibuat otomatis oleh workflow.</div>
-            <button class="btn sm warn hidden" id="ksDl">
-              <svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Backup Keystore
-            </button>
+            <button class="btn sm hidden" id="ksDl" style="background:var(--yellow)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download Backup Keystore</button>
             <div class="hint" style="color:var(--red);font-weight:800;margin-top:7px">Keystore hilang = app tidak bisa diupdate di Play Store. Simpan backup!</div>
           </div>
           <div><label class="lbl" for="whitelist">Whitelist domain</label><textarea class="inp" id="whitelist" rows="3" placeholder="example.com&#10;api.situsku.com" spellcheck="false"></textarea><div class="hint">Satu domain per baris.</div></div>
         </div>
       </div>
-
       <button class="btn primary" id="buildBtn" disabled style="width:100%;padding:15px;font-size:16px">
-        <svg class="ic wh" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg>
-        Build APK
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg> Build APK
       </button>
-
       <div id="termWrap" class="hidden" style="margin-top:13px">
         <div class="card" style="overflow:hidden">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px 13px;border-bottom:var(--border);background:var(--green-dark);color:#fff">
-            <span style="display:flex;align-items:center;gap:7px;font-weight:800;font-size:13.5px">
-              <svg class="ic wh" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Log Build
-            </span>
-            <span style="display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800">
-              <span id="termStat">Menunggu…</span>
-              <span class="pill" style="background:var(--yellow);color:var(--ink)" id="termTimer">00:00</span>
-            </span>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:9px;padding:10px 13px;border-bottom:var(--border);background:var(--ink);color:#A8D580">
+            <span style="display:flex;align-items:center;gap:7px;font-weight:800;font-size:13.5px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg> Log Build</span>
+            <span style="display:flex;align-items:center;gap:9px;font-size:12px;font-weight:800"><span id="termStat">Menunggu…</span><span class="pill" style="background:var(--yellow);color:var(--ink)" id="termTimer">00:00</span></span>
           </div>
           <div id="termBody"></div>
         </div>
         <div id="dlWrap" class="hidden" style="display:flex;gap:9px;margin-top:11px;flex-wrap:wrap">
-          <a class="btn primary" id="dlApk" target="_blank" rel="noopener">
-            <svg class="ic wh" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download APK
-          </a>
-          <a class="btn" id="dlAab" target="_blank" rel="noopener">
-            <svg class="ic" viewBox="0 0 24 24"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="m15 13-3 3-3-3"/><line x1="12" y1="16" x2="12" y2="10"/></svg> Download AAB
-          </a>
+          <a class="btn primary" id="dlApk" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download APK</a>
+          <a class="btn" id="dlAab" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14M5 8a2 2 0 1 0 0-4h14a2 2 0 1 0 0 4"/><path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8"/><path d="m15 13-3 3-3-3"/><line x1="12" y1="16" x2="12" y2="10"/></svg> Download AAB</a>
         </div>
-        <div id="buildFail" class="hidden state-box" style="margin-top:11px;border-color:var(--red)">
-          <b style="color:var(--red)">Build gagal.</b>
-          <div id="buildFailMsg" style="margin-top:5px;font-size:13px"></div>
-        </div>
+        <div id="buildFail" class="hidden state-box" style="margin-top:11px;border-color:var(--red)"><b style="color:var(--red)">Build gagal.</b><div id="buildFailMsg" style="margin-top:5px;font-size:13px"></div></div>
       </div>
     </section>
 
@@ -568,16 +498,12 @@ svg.ic.wh { stroke:#fff; }
     <!-- CHAT -->
     <section class="module hidden" id="mod-chat">
       <h2 class="sec-title">Chat Global</h2>
-      <div id="chatWarn" class="state-box hidden" style="margin-bottom:13px">
-        Nomor issue chat belum diisi. Buka menu (≡) → <b>Issue Chat Global</b>.
-      </div>
+      <div id="chatWarn" class="state-box hidden" style="margin-bottom:13px">Nomor issue chat belum diisi. Buka menu (≡) → <b>Issue Chat Global</b>.</div>
       <div id="chatBox" class="card hidden" style="display:flex;flex-direction:column;height:calc(100vh - 250px);min-height:360px;overflow:hidden">
         <div id="chatMsgs" style="flex:1;overflow-y:auto;padding:13px;display:flex;flex-direction:column;gap:9px"></div>
         <div style="display:flex;gap:9px;padding:11px;border-top:var(--border)">
           <input class="inp" id="chatIn" placeholder="Tulis pesan…" maxlength="500">
-          <button class="btn primary" id="chatSend" style="padding:11px 15px">
-            <svg class="ic wh" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
+          <button class="btn primary" id="chatSend" style="padding:11px 15px;flex:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
         </div>
       </div>
       <div id="chatSt"></div>
@@ -585,26 +511,17 @@ svg.ic.wh { stroke:#fff; }
   </main>
 
   <nav id="bnav">
-    <button class="nav-it active" data-nav="home">
-      <svg class="ic" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home
-    </button>
-    <button class="nav-it" data-nav="build">
-      <svg class="ic" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg>Build
-    </button>
-    <button class="nav-it" data-nav="edit">
-      <svg class="ic" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>Edit
-    </button>
-    <button class="nav-it" data-nav="chat">
-      <svg class="ic" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat
-    </button>
+    <button class="nav-it active" data-nav="home"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>Home</button>
+    <button class="nav-it" data-nav="build"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg>Build</button>
+    <button class="nav-it" data-nav="edit"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/></svg>Edit</button>
+    <button class="nav-it" data-nav="chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</button>
   </nav>
 </div>
 
-<!-- MODAL -->
 <div id="modalOv">
   <div class="card" id="modalBox">
     <div id="modalTitle"></div>
-    <div id="modalBody"></div>
+    <div id="modalBody" style="margin-top:8px"></div>
     <div id="modalInpWrap" class="hidden" style="margin-top:11px"><input class="inp" id="modalInp"></div>
     <div style="display:flex;gap:9px;margin-top:16px;justify-content:flex-end">
       <button class="btn sm" id="modalCancel">Batal</button>
@@ -616,95 +533,86 @@ svg.ic.wh { stroke:#fff; }
 <script>
 "use strict";
 /* ============================================================
-   NexaBuild v5
-   FIX KRITIS: GitHub API fetch diblokir CSP published artifact.
-   Solusi: gunakan Anthropic Claude API sebagai relay proxy
-   untuk semua GitHub API calls dari published artifact.
+   NexaBuild v7
+   FIX ROOT CAUSE TOKEN ERROR:
+   - Ganti "Bearer" → "token" prefix untuk Classic PAT
+   - "Bearer" hanya untuk GitHub Apps/OAuth apps, bukan Classic PAT
+   - "token <PAT>" adalah format benar yang GitHub support sejak 2012
+   - Tidak ada relay, langsung fetch ke api.github.com (GitHub API native CORS)
    ============================================================ */
 
-const $=(s,r=document)=>r.querySelector(s);
-const $$=(s,r=document)=>[...r.querySelectorAll(s)];
-const LS={
+const $  = (s,r=document) => r.querySelector(s);
+const $$ = (s,r=document) => [...r.querySelectorAll(s)];
+const LS = {
   g:(k,d)=>{try{const v=localStorage.getItem("nb_"+k);return v!==null?JSON.parse(v):d}catch{return d}},
   s:(k,v)=>{try{localStorage.setItem("nb_"+k,JSON.stringify(v))}catch{}},
   d:k=>{try{localStorage.removeItem("nb_"+k)}catch{}}
 };
 
-const ST={
-  token:LS.g("token",""), repo:LS.g("repo",""), issue:LS.g("issue",0),
-  user:LS.g("user",null), profile:LS.g("profile",{role:"Developer"}),
-  builds:[], rl:{rem:null,rst:null},
+const ST = {
+  token:  LS.g("token",""),
+  repo:   LS.g("repo",""),
+  issue:  LS.g("issue",0),
+  user:   LS.g("user",null),
+  profile:LS.g("profile",{role:"Developer"}),
+  builds: [],
   bld:{src:null,zip:null,type:null,b64:null,url:"",icon:null,iconGen:false,ks:null,gjson:null,running:false,runId:null,tInt:null,pInt:null}
 };
 
-/* ===== GitHub API via Claude relay =====
-   Published artifact tidak bisa fetch ke api.github.com (CSP block).
-   Kita kirim request ke Claude API, Claude forward ke GitHub.
+/* ===== GitHub API — DIRECT FETCH, "token" prefix =====
+   GitHub API support CORS dari browser secara native.
+   "Authorization: token <PAT>" = format yang benar untuk Classic PAT.
+   "Authorization: Bearer <PAT>" = SALAH untuk Classic PAT → 401 / CORS reject.
 */
-async function ghViaRelay(path,{method="GET",body=null,raw=false}={}){
+async function gh(path, {method="GET", body=null, raw=false, retries=2}={}) {
   if(!navigator.onLine) throw new Error("Kamu sedang offline.");
-
-  const prompt=`You are a GitHub API proxy. Make this exact GitHub API request and return ONLY the raw JSON response (or empty string for 204), nothing else, no explanation, no markdown:
-
-METHOD: ${method}
-URL: https://api.github.com${path}
-TOKEN: ${ST.token}
-BODY: ${body?JSON.stringify(body):"null"}
-
-If raw=true, return raw text. raw=${raw}
-
-Return the response body only. If status 204, return "null". If error, return JSON: {"__error__":true,"status":STATUS_CODE,"message":"ERROR_MESSAGE"}`;
-
-  const res=await fetch("https://api.anthropic.com/v1/messages",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:"claude-sonnet-4-6",
-      max_tokens:4000,
-      messages:[{role:"user",content:prompt}]
-    })
-  });
-
-  if(!res.ok){
-    const err=await res.json().catch(()=>({}));
-    throw new Error("Relay error: "+(err.error?.message||res.status));
+  let lastErr;
+  for(let i=0;i<retries;i++){
+    try{
+      const headers = {
+        "Authorization": "token " + ST.token,  /* "token" bukan "Bearer" */
+        "Accept":        "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+      };
+      if(body) headers["Content-Type"] = "application/json";
+      const res = await fetch("https://api.github.com" + path, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : null
+      });
+      if(res.status===204) return null;
+      const data = raw ? await res.text() : await res.json().catch(()=>null);
+      if(!res.ok){
+        if(res.status===401) throw Object.assign(new Error("401 Bad credentials"),{status:401});
+        if(res.status===403) throw Object.assign(new Error("403 Forbidden"),{status:403});
+        if(res.status===404) throw Object.assign(new Error("404 Not Found"),{status:404});
+        if(res.status===422) throw Object.assign(new Error("422 "+(data?.message||"Unprocessable")),{status:422});
+        throw Object.assign(new Error((data?.message)||"HTTP "+res.status),{status:res.status});
+      }
+      return data;
+    }catch(e){
+      lastErr=e;
+      /* Jangan retry untuk auth errors */
+      if(e.status===401||e.status===403) break;
+      if(i<retries-1) await new Promise(r=>setTimeout(r,900*(i+1)));
+    }
   }
-
-  const data=await res.json();
-  const text=(data.content||[]).map(b=>b.text||"").join("").trim();
-
-  if(!text||text==="null") return null;
-
-  // Strip markdown code fences if present
-  const clean=text.replace(/^```(?:json)?\n?/,"").replace(/\n?```$/,"").trim();
-
-  if(raw) return clean;
-
-  const parsed=JSON.parse(clean);
-  if(parsed&&parsed.__error__){
-    const e=new Error(parsed.message||"GitHub API error");
-    e.status=parsed.status;
-    throw e;
-  }
-  return parsed;
+  throw lastErr;
 }
 
-/* Alias: gh = ghViaRelay */
-const gh=ghViaRelay;
-
-/* ===== Error messages ===== */
 function fmtErr(e,ctx){
   const m=(e&&e.message)||String(e);
-  const st=e&&e.status;
+  const s=e&&e.status;
   if(/offline|sedang offline/i.test(m)) return m;
-  if(st===401||/401|Bad credentials/i.test(m))
+  if(/Failed to fetch|NetworkError|Load failed|AbortError/i.test(m))
+    return "Gagal terhubung ke GitHub. Cek koneksi internet kamu.";
+  if(s===401||/401|Bad credentials/i.test(m))
     return "Token ditolak GitHub (401). Pastikan: (1) token disalin lengkap tanpa spasi, (2) format ghp_ atau github_pat_, (3) scope 'repo' dan 'workflow' sudah dicentang. Buat token BARU kalau ragu.";
-  if(st===403) return "Akses ditolak (403). Token tidak punya izin cukup untuk operasi ini.";
-  if(st===404) return ctx==="repo"
-    ?"Repo tidak ditemukan. Periksa penulisan username/nama-repo dan pastikan repo public."
-    :"Data tidak ditemukan.";
-  if(st===422) return "Data tidak valid. Periksa isian kembali.";
-  if(/Relay error/i.test(m)) return "Relay API error: "+m;
+  if(s===403) return "Akses ditolak (403). Token tidak punya izin cukup untuk operasi ini.";
+  if(s===404) return ctx==="repo"
+    ? "Repo tidak ditemukan. Periksa penulisan owner/nama-repo dan pastikan repo PUBLIC."
+    : "Data tidak ditemukan.";
+  if(s===422) return "Data tidak valid.";
   return m;
 }
 
@@ -719,8 +627,7 @@ function toast(msg,ms=3200){
 function modal({title,body,input=false,value="",ok="OK",danger=false}){
   return new Promise(res=>{
     const ov=$("#modalOv");
-    $("#modalTitle").textContent=title;
-    $("#modalBody").innerHTML=body;
+    $("#modalTitle").textContent=title;$("#modalBody").innerHTML=body;
     $("#modalInpWrap").classList.toggle("hidden",!input);
     if(input)$("#modalInp").value=value;
     const ob=$("#modalOk");ob.textContent=ok;ob.className="btn sm "+(danger?"danger":"primary");
@@ -733,30 +640,24 @@ function modal({title,body,input=false,value="",ok="OK",danger=false}){
   });
 }
 
-/* ===== Field helpers ===== */
 function fErr(s,m){const e=$(s);if(!e)return;if(m){e.textContent=m;e.classList.add("show");}else e.classList.remove("show");}
 function fOk(s,m){const e=$(s);if(!e)return;if(m){e.textContent=m;e.classList.add("show");}else e.classList.remove("show");}
 function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));}
 
-/* ===== Offline ===== */
 const updOnline=()=>$("#offBanner").classList.toggle("hidden",navigator.onLine);
 window.addEventListener("online",()=>{updOnline();toast("Koneksi kembali online.");});
 window.addEventListener("offline",()=>{updOnline();toast("Koneksi terputus.");});
 updOnline();
 
-/* ===== Btn loading ===== */
 function btnLoad(b,on,lbl){
   if(on){b._orig=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin sm"></span> '+(lbl||"Memproses…");}
   else{b.disabled=false;if(b._orig)b.innerHTML=b._orig;}
 }
 
 /* ===== AUTH ===== */
-function showStep(n){
-  ["#step1","#step2","#step3"].forEach((s,i)=>$(s).classList.toggle("hidden",i!==n-1));
-}
+function showStep(n){["#step1","#step2","#step3"].forEach((s,i)=>$(s).classList.toggle("hidden",i!==n-1));}
 
 function isValidToken(t){
-  t=t.trim();
   return /^ghp_[A-Za-z0-9]{36,}$/.test(t)||
          /^gho_[A-Za-z0-9]{36,}$/.test(t)||
          /^ghs_[A-Za-z0-9]{36,}$/.test(t)||
@@ -766,15 +667,14 @@ function isValidToken(t){
 
 async function checkToken(){
   fErr("#tokErr");
-  const raw=$("#tokIn").value;
-  const t=raw.trim();
+  const t=$("#tokIn").value.trim();
   if(!t){fErr("#tokErr","Token masih kosong.");return;}
   if(/\s/.test(t)){fErr("#tokErr","Token mengandung spasi — salin ulang tanpa spasi.");return;}
-  if(!isValidToken(t)){fErr("#tokErr","Format token tidak dikenali. Classic: ghp_xyzABC… (40+ karakter). Fine-grained: github_pat_…");return;}
+  if(!isValidToken(t)){fErr("#tokErr","Format tidak dikenali. Classic: ghp_xyzABC… (40+ karakter). Fine-grained: github_pat_…");return;}
   ST.token=t;
   const b=$("#tokBtn");btnLoad(b,true,"Memverifikasi…");
   try{
-    const u=await gh("/user",{context:"token"});
+    const u=await gh("/user");
     ST.user={login:u.login,name:u.name||u.login,avatar:u.avatar_url};
     LS.s("token",t);LS.s("user",ST.user);
     $("#av1").src=ST.user.avatar;$("#uName").textContent=ST.user.name;$("#uLogin").textContent="@"+ST.user.login;
@@ -793,13 +693,13 @@ async function checkRepo(){
   fErr("#repoErr");fOk("#repoOk");
   const repo=$("#repoIn").value.trim().replace(/^https?:\/\/github\.com\//i,"").replace(/\/+$/,"");
   if(!repo){fErr("#repoErr","Nama repo kosong. Format: owner/nama-repo");return;}
-  if(!/^[A-Za-z0-9][\w.-]{0,99}\/[\w.-]+$/.test(repo)){fErr("#repoErr","Format salah. Contoh benar: nexa-ofc/nexa-app");return;}
+  if(!/^[A-Za-z0-9][\w.\-]{0,99}\/[\w.\-]+$/.test(repo)){fErr("#repoErr","Format salah. Contoh: nexa-ofc/nexa-app");return;}
   const b=$("#repoBtn");btnLoad(b,true,"Memeriksa repo…");
   try{
     const r=await gh("/repos/"+repo);
-    if(r.private) throw new Error("Repo PRIVATE. GitHub Actions gratis unlimited hanya untuk repo PUBLIC. Ubah visibilitas di Settings repo.");
+    if(r.private)throw Object.assign(new Error("Repo PRIVATE — GitHub Actions gratis unlimited hanya untuk repo PUBLIC. Ubah visibilitas di Settings."),{status:403});
     const ok=r.permissions&&(r.permissions.push||r.permissions.admin);
-    if(!ok) throw new Error("Token tidak punya akses tulis ke repo ini.");
+    if(!ok)throw Object.assign(new Error("Token tidak punya akses tulis ke repo ini."),{status:403});
     ST.repo=repo;LS.s("repo",repo);
     $("#uRepo2").textContent=repo;
     fOk("#repoOk","Repo OK: "+repo);
@@ -856,23 +756,17 @@ $$(".d-item").forEach(b=>b.onclick=async()=>{
   closeD();const k=b.dataset.d;
   if(k==="logout")return logout();
   if(k==="connection"){modal({title:"Koneksi GitHub",body:"Token: <b>"+esc(ST.token.slice(0,8))+"…</b><br>Repo: <b>"+esc(ST.repo)+"</b><br>User: <b>"+esc(ST.user?.login)+"</b>",ok:"Tutup"});return;}
-  if(k==="profile"){
-    const r=await modal({title:"Profil & Role",body:"Role tampil di Account Bar Home.",input:true,value:ST.profile.role||"Developer",ok:"Simpan"});
-    if(r!==null){ST.profile.role=r.trim()||"Developer";LS.s("profile",ST.profile);$("#hRole").textContent=ST.profile.role;toast("Role diperbarui.");}return;
-  }
-  if(k==="chatissue"){
-    const r=await modal({title:"Issue Chat Global",body:"Nomor issue di repo <b>"+esc(ST.repo)+"</b>:",input:true,value:String(ST.issue||""),ok:"Simpan"});
-    if(r!==null&&r.trim()){if(!/^\d+$/.test(r)||+r<1){toast("Nomor tidak valid.");return;}ST.issue=+r;LS.s("issue",ST.issue);startChat();toast("Issue chat diset ke #"+ST.issue);}return;
-  }
+  if(k==="profile"){const r=await modal({title:"Profil & Role",body:"Role tampil di Account Bar Home.",input:true,value:ST.profile.role||"Developer",ok:"Simpan"});if(r!==null){ST.profile.role=r.trim()||"Developer";LS.s("profile",ST.profile);$("#hRole").textContent=ST.profile.role;toast("Role diperbarui.");}return;}
+  if(k==="chatissue"){const r=await modal({title:"Issue Chat Global",body:"Nomor issue di repo <b>"+esc(ST.repo)+"</b>:",input:true,value:String(ST.issue||""),ok:"Simpan"});if(r!==null&&r.trim()){if(!/^\d+$/.test(r)||+r<1){toast("Nomor tidak valid.");return;}ST.issue=+r;LS.s("issue",ST.issue);startChat();toast("Issue chat diset ke #"+ST.issue);}return;}
   if(k==="keystore"){modal({title:"Keystore",body:"Kelola di form Build → Fitur Opsional. Selalu download backup keystore setelah generate.",ok:"Mengerti"});return;}
-  if(k==="about"){modal({title:"Tentang NexaBuild",body:"NexaBuild v5.0 — build APK/AAB 100% client-side. GitHub = backend, storage, dan compute. Tanpa server, tanpa biaya.",ok:"Tutup"});}
+  if(k==="about"){modal({title:"Tentang NexaBuild",body:"NexaBuild v7.0 — build APK/AAB 100% client-side. GitHub = backend &amp; compute via Actions. Tanpa server, tanpa biaya.",ok:"Tutup"});}
 });
 
 /* ===== NAVIGATION ===== */
 $$(".nav-it").forEach(b=>b.onclick=()=>{
   $$(".nav-it").forEach(x=>x.classList.remove("active"));b.classList.add("active");
   ["home","build","edit","chat","quran"].forEach(m=>$("#mod-"+m)?.classList.add("hidden"));
-  $("#mod-"+b.dataset.nav).classList.remove("hidden");
+  $("#mod-"+b.dataset.nav)?.classList.remove("hidden");
   if(b.dataset.nav==="edit")renderEditList();
   if(b.dataset.nav==="chat")startChat();
   if(b.dataset.nav==="build")nextVerCode();
@@ -880,7 +774,6 @@ $$(".nav-it").forEach(b=>b.onclick=()=>{
 });
 function showMod(m){["home","quran","build","edit","chat"].forEach(x=>$("#mod-"+x)?.classList.add("hidden"));$("#mod-"+m)?.classList.remove("hidden");$$(".nav-it").forEach(n=>n.classList.toggle("active",n.dataset.nav===m));window.scrollTo(0,0);}
 
-/* ===== RENDER STATE ===== */
 function rState(sel,kind,{onRetry,msg}={}){
   const c=$(sel);if(!c)return;
   if(kind==="loading")c.innerHTML='<div class="state-box"><div class="spin" style="margin:0 auto 10px"></div>Memuat…</div>';
@@ -892,27 +785,24 @@ function rState(sel,kind,{onRetry,msg}={}){
 
 /* ===== HOME ===== */
 function initHome(){
-  const items=[["GitHub: "+ST.repo,"#b3e5fc"],["v5.0 · NexaBuild","var(--yellow)"],["Tips: isi Privacy Policy sebelum Play Store","#ffe0b2"],["Build via GitHub Actions","var(--green-soft)"],["Token tersimpan lokal di HP","#e1bee7"]];
+  const items=[["GitHub: "+ST.repo,"var(--sky)"],["v7.0 · NexaBuild","var(--yellow)"],["Tips: isi Privacy Policy sebelum Play Store","var(--peach)"],["Build via GitHub Actions","var(--mint)"],["Token tersimpan lokal di HP","var(--lav)"]];
   const half=items.map(([t,c])=>'<span class="pill" style="background:'+c+'">'+esc(t)+'</span>').join("");
   $("#ticker").innerHTML=half+half;
   gh("/repos/"+ST.repo).then(()=>{$("#connDot").className="dot on";$("#connTxt").textContent="Terhubung";})
     .catch(()=>{$("#connDot").className="dot off";$("#connTxt").textContent="Terputus";});
   initWeather();initBattery();initStorage();initRam();startClock();
 }
-
 function initWeather(){
   if(!navigator.geolocation){$("#wTxt").textContent="Lokasi N/A";return;}
   navigator.geolocation.getCurrentPosition(async pos=>{
-    try{
-      const d=await(await fetch("https://api.open-meteo.com/v1/forecast?latitude="+pos.coords.latitude+"&longitude="+pos.coords.longitude+"&current=temperature_2m&timezone=auto")).json();
-      $("#wTxt").textContent=Math.round(d.current.temperature_2m)+"°C";
-    }catch{$("#wTxt").textContent="N/A";}
+    try{const d=await(await fetch("https://api.open-meteo.com/v1/forecast?latitude="+pos.coords.latitude+"&longitude="+pos.coords.longitude+"&current=temperature_2m&timezone=auto")).json();$("#wTxt").textContent=Math.round(d.current.temperature_2m)+"°C";}
+    catch{$("#wTxt").textContent="N/A";}
   },()=>{$("#wTxt").textContent="Izin ditolak";},{timeout:7000});
 }
 function initBattery(){
   if(!navigator.getBattery){$("#batTxt").textContent="N/A";return;}
   navigator.getBattery().then(b=>{
-    const u=()=>{const p=Math.round(b.level*100);$("#batTxt").textContent=p+"%"+(b.charging?" ⚡":"");$("#batBar").style.width=p+"%";$("#batBar").style.background=p<20?"var(--red)":"var(--green-mid)";};
+    const u=()=>{const p=Math.round(b.level*100);$("#batTxt").textContent=p+"%"+(b.charging?" ⚡":"");$("#batBar").style.width=p+"%";$("#batBar").style.background=p<20?"var(--red)":"var(--lime-mid)";};
     u();b.addEventListener("levelchange",u);b.addEventListener("chargingchange",u);
   }).catch(()=>{$("#batTxt").textContent="N/A";});
 }
@@ -939,7 +829,7 @@ async function renderQHome(){
     $("#qContent").innerHTML='<div class="card" style="padding:13px;margin-bottom:13px"><div class="lbl">Pilih Surah</div><div id="sList" style="max-height:340px;overflow-y:auto;margin-top:6px"></div></div>';
     d.data.forEach(s=>{
       const b=document.createElement("button");b.className="surah-item";
-      b.innerHTML='<span class="pill" style="background:var(--mint);min-width:34px;justify-content:center">'+s.number+'</span><span style="flex:1">'+esc(s.englishName)+' <span style="color:#777;font-size:11.5px">('+esc(s.englishNameTranslation)+')</span></span><span style="font-size:18px">'+esc(s.name)+'</span>';
+      b.innerHTML='<span class="pill" style="background:var(--mint);min-width:34px;justify-content:center">'+s.number+'</span><span style="flex:1">'+esc(s.englishName)+' <span style="color:#555;font-size:11.5px">('+esc(s.englishNameTranslation)+')</span></span><span style="font-size:18px">'+esc(s.name)+'</span>';
       b.onclick=()=>renderSurah(s.number);$("#sList").appendChild(b);
     });
   }catch{rState("#qContent","error",{msg:"Gagal memuat surah.",onRetry:renderQHome});}
@@ -950,7 +840,7 @@ async function renderSurah(n){
     const d=await(await fetch("https://api.alquran.cloud/v1/surah/"+n+"/id.indonesian")).json();
     if(d.code!==200)throw 0;
     const s=d.data;
-    let h='<div class="card" style="padding:13px;margin-bottom:13px"><button class="btn sm" id="bSurah">← Daftar Surah</button><h3 style="font-weight:900;font-size:19px;color:var(--green-dark);margin:11px 0 3px">'+esc(s.englishName)+' · '+esc(s.name)+'</h3><div style="font-size:12.5px;color:#2d6b3a;font-weight:700">'+esc(s.englishNameTranslation)+' · '+s.numberOfAyahs+' ayat</div></div>';
+    let h='<div class="card" style="padding:13px;margin-bottom:13px"><button class="btn sm" id="bSurah">← Daftar Surah</button><h3 style="font-weight:900;font-size:19px;margin:11px 0 3px">'+esc(s.englishName)+' · '+esc(s.name)+'</h3><div style="font-size:12.5px;color:var(--ink2);font-weight:700">'+esc(s.englishNameTranslation)+' · '+s.numberOfAyahs+' ayat</div></div>';
     s.ayahs.forEach(a=>{h+='<div class="ayah"><span class="ayah-num">'+a.numberInSurah+'</span><div class="ayah-ar" dir="rtl">'+esc(a.text)+'</div><div class="ayah-id">'+esc(a.edition?.text||"")+'</div></div>';});
     $("#qContent").innerHTML=h;
     $("#bSurah").onclick=renderQHome;window.scrollTo(0,0);
@@ -976,7 +866,7 @@ $("#zipIn").onchange=async e=>{
     const zip=await JSZip.loadAsync(f);
     const names=Object.keys(zip.files).filter(n=>!zip.files[n].dir);
     if(!names.length){fErr("#typeErr","ZIP kosong.");return;}
-    ST.bld.b64=await b64(f);ST.bld.zip=f.name;ST.bld.src="zip";ST.bld.url="";
+    ST.bld.b64=await b64r(f);ST.bld.zip=f.name;ST.bld.src="zip";ST.bld.url="";
     $("#urlWrap").classList.add("hidden");$("#urlIn").value="";
     $("#zipInfo").classList.remove("hidden");
     $("#zipInfo").textContent="ZIP: "+f.name+" · "+fmt(f.size)+" · "+names.length+" file";
@@ -987,23 +877,23 @@ $("#zipIn").onchange=async e=>{
     else if(names.some(n=>/(^|\/)app\.json$/.test(n))&&names.some(n=>/(^|\/)metro\.config\.js$/.test(n)))type="reactnative";
     else if(names.some(n=>/(^|\/)index\.html$/.test(n)))type="webview";
     if(!type){ST.bld.type=null;setType("?","var(--red)");fErr("#typeErr","Tipe tidak dikenali. Gunakan koreksi manual.");$("#fixType").classList.remove("hidden");}
-    else{ST.bld.type=type;setType(TYPES[type].label,"var(--green-soft)");$("#fixType").classList.remove("hidden");rPerms(type);drawIcon();}
+    else{ST.bld.type=type;setType(TYPES[type].label,"var(--mint)");$("#fixType").classList.remove("hidden");rPerms(type);drawIcon();}
     vForm();
   }catch{fErr("#typeErr","ZIP tidak bisa dibaca.");}
 };
-function b64(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=()=>rej();r.readAsDataURL(f);});}
+function b64r(f){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(",")[1]);r.onerror=()=>rej();r.readAsDataURL(f);});}
 function setType(label,bg){const p=$("#detType");p.textContent=label;p.style.background=bg;}
 $("#urlIn").oninput=()=>{
   const v=$("#urlIn").value.trim();fErr("#urlErr");
   if(!v){ST.bld.url="";ST.bld.type=null;setType("Belum ada sumber","var(--yellow)");vForm();return;}
-  try{const u=new URL(v);if(!/^https?:$/.test(u.protocol))throw 0;ST.bld.url=v;ST.bld.src="url";ST.bld.type="webview";ST.bld.b64=null;$("#zipInfo").classList.add("hidden");setType("Capacitor WebView","var(--green-soft)");$("#fixType").classList.remove("hidden");rPerms("webview");drawIcon();}
-  catch{fErr("#urlErr","URL tidak valid. Harus diawali http:// atau https://");ST.bld.url="";}
+  try{const u=new URL(v);if(!/^https?:$/.test(u.protocol))throw 0;ST.bld.url=v;ST.bld.src="url";ST.bld.type="webview";ST.bld.b64=null;$("#zipInfo").classList.add("hidden");setType("Capacitor WebView","var(--mint)");$("#fixType").classList.remove("hidden");rPerms("webview");drawIcon();}
+  catch{fErr("#urlErr","URL tidak valid.");ST.bld.url="";}
   vForm();
 };
 $("#fixType").onclick=async()=>{
   const r=await modal({title:"Koreksi Tipe",body:"Ketik: <b>capacitor</b>, <b>cordova</b>, <b>flutter</b>, <b>reactnative</b>, atau <b>webview</b>.",input:true,value:ST.bld.type||"",ok:"Terapkan"});
   if(r===null)return;const t=r.trim().toLowerCase();
-  if(TYPES[t]){ST.bld.type=t;setType(TYPES[t].label,"var(--green-soft)");fErr("#typeErr");rPerms(t);vForm();}
+  if(TYPES[t]){ST.bld.type=t;setType(TYPES[t].label,"var(--mint)");fErr("#typeErr");rPerms(t);vForm();}
   else fErr("#typeErr","Tipe tidak dikenal: "+esc(r));
 };
 function rPerms(type){const sg=TYPES[type]?.perms||["INTERNET"];$("#permList").innerHTML=PERMS.map(p=>'<label><input type="checkbox" class="pCb" value="'+p+'" '+(sg.includes(p)?"checked":"")+"> <span>"+p+"</span></label>").join("");}
@@ -1011,9 +901,8 @@ const getPerms=()=>$$(".pCb").filter(c=>c.checked).map(c=>c.value);
 
 function drawIcon(){
   const c=$("#iconPrev"),x=c.getContext("2d");
-  x.fillStyle=$("#themeClr").value||"#c8e6c9";x.fillRect(0,0,96,96);
-  x.fillStyle=getComputedStyle(document.documentElement).getPropertyValue("--green-dark").trim()||"#1a5c2e";
-  x.font="bold 40px 'Nunito',sans-serif";x.textAlign="center";x.textBaseline="middle";
+  x.fillStyle=$("#themeClr").value||"#76FF03";x.fillRect(0,0,96,96);
+  x.fillStyle="#0A1800";x.font="bold 40px 'Nunito',sans-serif";x.textAlign="center";x.textBaseline="middle";
   x.fillText(($("#appName").value.trim()[0]||"N").toUpperCase(),48,52);
   ST.bld.icon=null;ST.bld.iconGen=true;
   $("#iconHint").textContent="Icon default dari inisial. Upload gambar untuk pakai icon sendiri.";
@@ -1046,7 +935,7 @@ $("#ksUp").onclick=()=>$("#ksIn").click();
 $("#ksIn").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   if(f.size>1024*1024){$("#ksStatus").textContent="Keystore maksimal 1 MB.";return;}
-  try{ST.bld.ks={mode:"upload",data:await b64(f),name:f.name};$("#ksStatus").textContent="Keystore: "+f.name+" ("+fmt(f.size)+")";$("#ksDl").classList.remove("hidden");toast("Keystore terupload.");}
+  try{ST.bld.ks={mode:"upload",data:await b64r(f),name:f.name};$("#ksStatus").textContent="Keystore: "+f.name+" ("+fmt(f.size)+")";$("#ksDl").classList.remove("hidden");toast("Keystore terupload.");}
   catch{$("#ksStatus").textContent="Keystore tidak bisa dibaca.";}
 };
 $("#ksDl").onclick=()=>{
@@ -1079,7 +968,7 @@ async function nextVerCode(){
   if($("#verCode").value)return;
   try{
     const f=await gh("/repos/"+ST.repo+"/contents/builds.json");
-    ST.builds=JSON.parse(atob(f.content.replace(/\n/g,""))).builds||[];
+    ST.builds=(JSON.parse(atob(f.content.replace(/\n/g,""))).builds)||[];
     const last=ST.builds.reduce((m,b)=>Math.max(m,b.versionCode||0),0);
     $("#verCode").value=last+1;if(!$("#verName").value)$("#verName").value="1.0."+last;
   }catch{$("#verCode").value=1;if(!$("#verName").value)$("#verName").value="1.0.0";}
@@ -1109,7 +998,7 @@ async function doBuild(existCfg){
   }catch(e){
     tLog("error",fmtErr(e,"build"));
     ST.bld.running=false;btn.disabled=false;
-    btn.innerHTML='<svg class="ic wh" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg> Build APK';
+    btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg> Build APK';
     toast("Build gagal dimulai.");
   }
 }
@@ -1136,8 +1025,8 @@ async function upsert(path,content,msg){
   await gh("/repos/"+ST.repo+"/contents/"+path,{method:"PUT",body:{message:msg,content:btoa(unescape(encodeURIComponent(content))),sha,branch:"main"}});
 }
 function tLog(lv,msg){
-  const cls={info:"#9ecfff",success:"#8ee2a8",warning:"#ffd166",error:"#ff9d9d"};
-  const d=document.createElement("div");d.style.color=cls[lv]||"#a8d5b0";
+  const cls={info:"#9ecfff",success:"#A8D580",warning:"#ffd166",error:"#ff9d9d"};
+  const d=document.createElement("div");d.style.color=cls[lv]||"#A8D580";
   d.textContent="["+new Date().toLocaleTimeString()+"] "+msg;
   const b=$("#termBody");b.appendChild(d);b.scrollTop=b.scrollHeight;
 }
@@ -1166,7 +1055,7 @@ async function pollRun(runId,cfg){
 }
 async function finishBuild(run,cfg){
   const btn=$("#buildBtn");ST.bld.running=false;btn.disabled=false;
-  btn.innerHTML='<svg class="ic wh" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg> Build APK';
+  btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94Z"/></svg> Build APK';
   cfg.status=run.conclusion==="success"?"success":"failed";cfg.builtAt=new Date().toISOString();
   if(run.conclusion==="success"){
     tLog("success","Build selesai sukses!");
@@ -1205,8 +1094,8 @@ function renderEditList(){
   c.innerHTML="";
   ST.builds.forEach(b=>{
     const el=document.createElement("div");el.className="card";el.style.cssText="display:flex;gap:11px;align-items:center;padding:12px;margin-bottom:10px";
-    const img=b.iconDataUrl?('<img src="'+b.iconDataUrl+'" style="width:48px;height:48px;border:var(--border);border-radius:8px;object-fit:cover">'):('<div style="width:48px;height:48px;border:var(--border);border-radius:8px;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--green-dark)">'+esc((b.appName||"?")[0])+'</div>');
-    el.innerHTML=img+'<div style="flex:1;min-width:0"><div style="font-weight:900">'+esc(b.appName)+' <span style="font-size:12px;color:#2d6b3a;font-weight:700">v'+esc(b.versionName)+'</span></div><div style="font-size:12px;color:#2d6b3a;font-weight:700">'+esc(TYPES[b.projectType]?.label||b.projectType)+' · <span style="color:'+(b.status==="success"?"var(--ok)":"var(--red)")+';font-weight:800">'+esc(b.status)+'</span></div></div><button class="btn sm">Edit</button>';
+    const img=b.iconDataUrl?('<img src="'+b.iconDataUrl+'" style="width:48px;height:48px;border:var(--border);border-radius:8px;object-fit:cover">'):('<div style="width:48px;height:48px;border:var(--border);border-radius:8px;background:var(--mint);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;color:var(--ink)">'+esc((b.appName||"?")[0])+'</div>');
+    el.innerHTML=img+'<div style="flex:1;min-width:0"><div style="font-weight:900">'+esc(b.appName)+' <span style="font-size:12px;color:var(--ink2);font-weight:700">v'+esc(b.versionName)+'</span></div><div style="font-size:12px;color:var(--ink2);font-weight:700">'+esc(TYPES[b.projectType]?.label||b.projectType)+' · <span style="color:'+(b.status==="success"?"var(--ok)":"var(--red)")+';font-weight:800">'+esc(b.status)+'</span></div></div><button class="btn sm">Edit</button>';
     el.querySelector("button").onclick=()=>loadForm(b);
     c.appendChild(el);
   });
@@ -1219,17 +1108,18 @@ function loadForm(b){
   ST.bld.type=cfg.projectType;ST.bld.src=cfg.sourceType;ST.bld.url=cfg.url||"";
   if(cfg.url){$("#urlIn").value=cfg.url;$("#urlWrap").classList.remove("hidden");}
   if(cfg.zipBase64){ST.bld.b64=cfg.zipBase64;ST.bld.zip=cfg.zipName;$("#zipInfo").classList.remove("hidden");$("#zipInfo").textContent="ZIP (riwayat): "+cfg.zipName;}
-  setType(TYPES[cfg.projectType]?.label||cfg.projectType,"var(--green-soft)");$("#fixType").classList.remove("hidden");
+  setType(TYPES[cfg.projectType]?.label||cfg.projectType,"var(--mint)");$("#fixType").classList.remove("hidden");
   rPerms(cfg.projectType||"webview");
   (cfg.permissions||[]).forEach(p=>{const cb=$$(".pCb").find(c=>c.value===p);if(cb)cb.checked=true;});
-  $("#splashTxt").value=cfg.splashText||"";$("#orient").value=cfg.orientation||"portrait";$("#themeClr").value=cfg.themeColor||"#c8e6c9";
+  $("#splashTxt").value=cfg.splashText||"";$("#orient").value=cfg.orientation||"portrait";$("#themeClr").value=cfg.themeColor||"#76FF03";
   if(cfg.webview){$("#optZoom").checked=!!cfg.webview.zoom;$("#optPull").checked=!!cfg.webview.pullToRefresh;$("#optBack").checked=!!cfg.webview.backToClose;$("#optOffline").checked=!!cfg.webview.offlinePage;}
   $("#privUrl").value=cfg.privacyUrl||"";$("#optPush").checked=!!cfg.push?.enabled;if(cfg.push?.gjson)ST.bld.gjson=cfg.push.gjson;
   $("#optLogin").checked=!!cfg.login?.enabled;$("#whitelist").value=(cfg.whitelist||[]).join("\n");
   if(cfg.keystore)ST.bld.ks={mode:cfg.keystore.mode,data:cfg.keystore.data,name:cfg.keystore.name};
   if(cfg.iconDataUrl){ST.bld.icon=cfg.iconDataUrl;const c=$("#iconPrev"),x=c.getContext("2d"),im=new Image();im.onload=()=>{x.clearRect(0,0,96,96);x.drawImage(im,0,0,96,96);};im.src=cfg.iconDataUrl;$("#iconHint").textContent="Icon dari riwayat build.";}
   else drawIcon();
-  vForm();modal({title:"Config dimuat",body:"Konfigurasi <b>"+esc(b.appName)+"</b> dimuat ke form Build. Version code sudah di-increment.",ok:"OK"});
+  vForm();
+  modal({title:"Config dimuat",body:"Konfigurasi <b>"+esc(b.appName)+"</b> dimuat ke form Build. Version code sudah di-increment.",ok:"OK"});
 }
 
 /* ===== CHAT ===== */
@@ -1250,7 +1140,7 @@ async function loadChat(first){
     fresh.forEach(c=>{
       chatLastId=Math.max(chatLastId,c.id);const mine=c.user.login===ST.user?.login;
       const row=document.createElement("div");row.style.cssText="display:flex;gap:7px;"+(mine?"flex-direction:row-reverse;":"");
-      row.innerHTML='<img src="'+esc(c.user.avatar_url)+'" style="width:28px;height:28px;border:var(--border);border-radius:7px;flex:none"><div style="max-width:75%"><div style="font-size:11px;font-weight:800;color:#2d6b3a;margin-bottom:2px;'+(mine?"text-align:right;":"")+'">'  +esc(c.user.login)+" · "+relTime(c.created_at)+'</div><div class="cbubble" style="background:'+(mine?"var(--green-soft)":"var(--surface)")+'">'  +esc(c.body)+'</div></div>';
+      row.innerHTML='<img src="'+esc(c.user.avatar_url)+'" style="width:28px;height:28px;border:var(--border);border-radius:7px;flex:none"><div style="max-width:75%"><div style="font-size:11px;font-weight:800;color:var(--ink2);margin-bottom:2px;'+(mine?"text-align:right;":"")+'">'  +esc(c.user.login)+" · "+relTime(c.created_at)+'</div><div class="cbubble" style="background:'+(mine?"var(--mint)":"var(--surface)")+'">'  +esc(c.body)+'</div></div>';
       box.appendChild(row);
     });
     if(fresh.length)box.scrollTop=box.scrollHeight;
@@ -1270,6 +1160,7 @@ $("#chatIn").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat();});
 /* ===== BOOT ===== */
 if(ST.token&&ST.repo&&ST.user){
   bootApp();
+  /* Re-validasi token di background tanpa ganggu UI */
   gh("/user").then(u=>{ST.user={login:u.login,name:u.name||u.login,avatar:u.avatar_url};LS.s("user",ST.user);$("#hAvatar").src=ST.user.avatar;$("#hName").textContent=ST.user.name;}).catch(()=>{});
 }else{
   showStep(1);
